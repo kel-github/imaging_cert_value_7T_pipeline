@@ -1,0 +1,227 @@
+#!/bin/bash
+#
+## Written by K. Garner, based on http://reproducibility.stanford.edu/bids-tutorial-series-part-1b/
+# start
+
+set -e # this command causes the script to exit on error
+####################################################################################################
+#### Defining pathways
+####################################################################################################
+rawloc=/QRISdata/Q1240/CAI/Research_19028_Neural_Pathways
+outpath=/30days/uqkgarn1/STRIWP1BIDS
+niidir=/30days/uqkgarn1/STRIWP1BIDS
+logdir=/30days/uqkgarn1/STRIWP1LOGS
+####################################################################################################
+
+####################################################################################################
+#### copy over data from collection to scratch
+####################################################################################################
+subjs=(2 4 5)
+ses=(2 3 4)
+
+for subj in "${subjs[@]}"; do
+    
+    for sess in "${ses[@]}"; do
+        raw_fName=$(find ${rawloc}/ -name "SUB-0${subj}_SES-0${sess}_*")
+        echo "${raw_fName}"
+        if [ -z "${raw_fName}" ]
+        then 
+            echo "raw files folder not found"
+            exit 1
+        fi
+        echo "${outpath}"
+        if [ -z "${outpath}" ]
+        then 
+            echo "output path not found"
+            exit 1
+        fi
+        rsync -rv "${raw_fName}" "${outpath}"
+    done
+done
+
+
+##################################################################################################
+## Anatomical Organization ####
+##################################################################################################
+subjs=(2 4 5)
+ses=(2 3 4)
+fname=("*mp2rage_0.75iso_7t_uni-den")
+
+for subj in "${subjs[@]}"; do
+    
+    for sess in "${ses[@]}"; do
+    echo "Processing subject $subj session $sess"
+
+    ###Create structure
+    mkdir -p "${niidir}/sub-0${subj}/ses-0${sess}/anat"
+
+    ### extract images of interest
+    for z in *mp2rage_0.75iso_7t_uni-den.zip; do
+        # get folder name for subjects dcm data
+        dcm_fName=$(find "${niidir}/" -name "SUB-0${subj}_SES-0${sess}_*")
+        unzip -d "${niidir}/sub-0${subj}/ses-0${sess}/anat" ${dcm_fName}/$z 
+    done
+
+    # convert to nii + BIDS
+    ./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess}/anat -f sub-0${subj}_ses-0${sess}_T1w ${niidir}/sub-0${subj}/ses-0${sess}/anat
+    
+    rm ${niidir}/sub-0${subj}/ses-0${sess}/anat/*.dcm
+    #dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess}/anat -f sub-0${subj}_ses-0${sess}_T1w ${dcmdir}/sub-0${subj}/ses-0${sess}/anat
+done
+done
+
+# ####################################################################################################
+# #### Functional Organisation ####
+# ####################################################################################################
+
+# set check variables for the multiecho sequence
+subjs=(5)
+ses=(3)
+
+# unzip each functional set of images into their own folder
+direcs=(*cmrr_*_1.5mm.zip *cmrr_*_2.0mm.zip *wip_3depi*.zip)
+#*cmrr_*_2.0mm.zip *wip*m.zip
+for subj in "${subjs[@]}"; do
+
+    for sess in "${ses[@]}"; do
+
+        mkdir -p ${niidir}/sub-0${subj}/ses-0${sess}/func
+
+        for z in "${direcs[@]}"; do
+            
+            fname=$(find ${niidir}/SUB-0${subj}_SES-0${sess}_*/${z})
+            #new_name=$(echo $fname | rev | cut -f 2- -d '.' | rev)
+            new_name=$(basename $fname)
+            new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
+            unzip "${fname}" -d "${niidir}/sub-0${subj}/ses-0${sess}/${new_name}"
+
+            testing_for_me=*cmrr_*_2.0mm.zip
+            if [ "${z}" == "${testing_for_me}" ]; then
+                    ./dcm2niix -m n -o ${niidir}/sub-0${subj}/ses-0${sess}/ -f sub-0${subj}_ses-0${sess}_%p_%e_%4s ${niidir}/sub-0${subj}/ses-0${sess}/${new_name} 
+                    #dcm2niix -m y -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_%p ${new_name} 
+            else
+                ./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
+                #dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_%p ${new_name}
+            fi  
+        done
+    done
+done
+
+
+# where relevant, do the sbref (single band reference image) files
+direcs=(*cmrr_*_1.5mm_sbref.zip *cmrr_*_2.0mm_sbref.zip)
+
+for subj in "${subjs[@]}"; do
+
+    for sess in "${ses[@]}"; do
+
+        for z in "${direcs[@]}"; do
+            
+            fname=$(find ${niidir}/SUB-0${subj}_SES-0${sess}_*/${z})
+            new_name=$(basename $fname)
+            new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
+            #echo "$new_name"
+            unzip ${fname} -d ${niidir}/sub-0${subj}/ses-0${sess}/${new_name} 
+            test_str=*cmrr_*_2.0mm_sbref.zip 
+            if [ "${z}" == "${test_str}" ]; then
+                ./dcm2niix -m n -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_sbref_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
+            else
+                ./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_sbref_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
+            #dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess} -f sub-0${subj}_ses-0${sess}_%p ${new_name}
+            fi
+        done
+    done
+done
+
+# now rename and move the files
+direcs=(cmrr_*_1.5mm* cmrr_*_2.0mm* WIP*m*)
+for subj in "${subjs[@]}"; do
+
+    for sess in "${ses[@]}"; do
+
+        for z in "${direcs[@]}"; do
+
+        # first get TR
+        if [ "${z}" == "cmrr_*_1.5mm*" ]; then
+            TR=1510
+        elif [ "${z}" == "cmrr_*_2.0mm*" ]; then
+            TR=700
+        elif [ "${z}" == "WIP*m*" ]; then
+            TR=1920
+        fi
+
+        if   [ "${z}" == "cmrr_*_2.0mm*" ]; then
+            
+            # do multiecho things
+            fname_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}_1_*.json)
+            mv ${fname_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-1_bold.json
+            fname_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}_2_*.json)
+            mv ${fname_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-2_bold.json
+            
+            # and BOLD
+            fname_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}_1_*.nii)
+            mv ${fname_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-1_bold.nii
+            fname_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}_2_*.nii)
+            mv ${fname_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-2_bold.nii
+
+            # rename sbref files
+            fname_sbref_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}_e1*.nii)
+            fname_sbref_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}_e1*.json)
+            mv ${fname_sbref_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-1_sbref.json
+            mv ${fname_sbref_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-1_sbref.nii
+        
+            fname_sbref_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}_e2*.nii)
+            fname_sbref_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}_e2*.json)
+            mv ${fname_sbref_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-2_sbref.json
+            mv ${fname_sbref_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_echo-2_sbref.nii
+        
+        else  
+            # json (bold) file
+            fname_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}.json)
+            mv ${fname_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_bold.json
+            # nii (bold) file
+            fname_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_${z}.nii)
+            mv ${fname_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_bold.nii
+            # where relevant, # sbref (T2*) file
+            if [ "${z}" != "WIP*m*" ]; then
+
+                fname_sbref_nii=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}.nii)
+                fname_sbref_json=$(find ${niidir}/sub-0${subj}/ses-0${sess}/sub-0${subj}_ses-0${sess}_sbref_${z}.json)
+                mv ${fname_sbref_json} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_sbref.json
+                mv ${fname_sbref_nii} ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_sbref.nii
+
+            fi
+
+
+
+        fi
+
+            ## now copy the relevant event file
+            cp ${logdir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_events.tsv ${niidir}/sub-0${subj}/ses-0${sess}/func/sub-0${subj}_ses-0${sess}_task-learnAtt_acq-TR${TR}_events.tsv
+        done
+    done
+done
+
+# ####################################################################################################
+# #### Remove unneeded files ####
+# ####################################################################################################
+
+for subj in "${subjs[@]}"; do
+
+    for sess in "${ses[@]}"; do
+
+        rm -rv ${niidir}/sub-0${subj}/ses-0${sess}/*wip*
+        rm -rv ${niidir}/sub-0${subj}/ses-0${sess}/*cmrr*
+        rm -rv ${niidir}/SUB-0${subj}_SES-0${sess}_*
+
+    done
+done
+
+# ####################################################################################################
+# #### copy back to original location ####
+# ####################################################################################################
+for subj in "${subjs[@]}"; do
+
+    zip -r "${niidir}/sub-0${subj}.zip" "${niidir}/sub-0${subj}"
+    rsync -rv "${niidir}/sub-0${subj}.zip" "${rawloc}"
+done
