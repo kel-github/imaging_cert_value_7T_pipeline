@@ -15,8 +15,10 @@
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
 - in the same interactive job run
-    ```ml matlab
-    matlab```
+    ```
+	ml matlab
+    matlab
+	```
 - run 
     ```get_physio_regressor_files(wd, sub)```
     
