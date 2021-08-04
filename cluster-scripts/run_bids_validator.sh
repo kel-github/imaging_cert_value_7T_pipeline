@@ -11,9 +11,7 @@ PROJPATH=/scratch/user/uqkgarn1/VALCERT
 BVALPATH=/scratch/user/uqkgarn1/images/
 
 module load singularity/3.5.0
-singularity run -B $PROJPATH
 
-singularity run -ti --rm -v \
-                -B $PROJPATH:/data:ro \
-                $BVALPATH/bids-validator.simg \
-                 /data
+singularity run -c -B $PROJPATH:/data:ro \
+                      $BVALPATH/bids-validator.simg \
+                      /data

@@ -13,7 +13,7 @@ set -e # this command causes the script to exit on error
 ####################################################################################################
 #### Defining pathways
 ####################################################################################################
-rawloc=/QRISdata/Q1240/CAI/Research_19028_ATTLEARN
+rawloc=/QRISdata/Q1240/VALCERT/source
 outpath=/scratch/user/uqkgarn1/VALCERT
 niidir=/scratch/user/uqkgarn1/VALCERT
 logdir=/scratch/user/uqkgarn1/VALCERTLOGS
