@@ -1,6 +1,8 @@
 {
     "BIDSVersion": "1.0.0",
-    "Author": "Kelly Garner",
-    "Email": "getkellygarner@gmail.com"
+	"Name": "spatial certainty and incentive value @ 7T",
+	"TaskName": "attlearn",
+    "Author": ["Kelly Garner"],
+    "Email": "getkellygarner@gmail.com",
     "License": "CC BY-NC"
 }
