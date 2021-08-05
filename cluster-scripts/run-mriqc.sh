@@ -21,6 +21,6 @@ singularity run -c -B /scratch/user/uqkgarn1/VALCERT:/bids-root \
                    -B /home/uqkgarn1/tmplts:/tmplts \
 				   -B /scratch/user/uqkgarn1/work:/work \
 				/scratch/user/uqkgarn1/images/mriqc.simg -w /work \
-					   --n_procs 4 --mem_gb 10 \
+					   --n_procs 1 --mem_gb 10 --n_cpus 4 \
 					   /bids-root/ /output-folder/ participant \
 					   --participant-label 01
