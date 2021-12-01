@@ -5,16 +5,16 @@
 
 1. move data from source and convert to .nii
 
-- start an interactive job on awoonga using the command:
-     qsub -I -A UQ-QBI -l ncpus=1 -l mem=10GB -l walltime=00:30:00
-- from the home directory edit 'convert_data_to_BIDS' to bring over the subject data you want
-    run
+- ensure data is copied to ~/Desktop/neurodesktop-storage/data/source/
+    - you'll need to make sure any extraneous files such as prematurely stopped runs/extra mp2rage (in the case of the distortion correction subs) have been removed
+- in 'convert_data_to_BIDS' ensure that each subs and run variable is set correctly (for the subs you want to run)
+- in terminal, navigate to the directory ~/Desktop/neurodesktop-storage/scripts/name-of-repo/cai2bids/ and run the command
     
     ```./convert_data_to_BIDS```
     
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
-- in the same interactive job run
+- in neurodesk run
     ```
 	ml matlab
     matlab
