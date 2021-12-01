@@ -11,6 +11,9 @@
 - in terminal, navigate to the directory ~/Desktop/neurodesktop-storage/scripts/name-of-repo/cai2bids/ and run the command
     
     ```./convert_data_to_BIDS```
+
+    NOTE: this data deletes the original unformatted data from source, cos having it around will clog things up
+    NOTE: after running this, manually move to the level above
     
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
