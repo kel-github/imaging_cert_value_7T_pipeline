@@ -125,7 +125,7 @@ for subj in "${subjs[@]}"; do
             new_name=$(basename $fname)
             new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
             echo "$new_name"
-            unzip "${fname}" -d "${niidir}sub-0${subj}/ses-0${sess}/${new_name}"
+            unzip "${fname}" -d "${niidir}sub-0${subj}/ses-0${sess}/func/${new_name}"
 #			./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess}/func -f sub-0${subj}_ses-0${sess}_physiolog_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
                 
         done

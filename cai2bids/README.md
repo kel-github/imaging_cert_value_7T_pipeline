@@ -17,7 +17,7 @@
     
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
-- in neurodesk run
+- * *not currently implemented in neurodesk*
     ```
 	ml matlab
     matlab
