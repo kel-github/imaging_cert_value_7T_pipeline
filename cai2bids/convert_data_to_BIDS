@@ -16,7 +16,7 @@ set -e # this command causes the script to exit on error
 rawloc=~/Desktop/neurodesktop-storage/data/source/
 outpath=~/Desktop/neurodesktop-storage/data/
 niidir=~/Desktop/neurodesktop-storage/data/source/
-logdir=~/Desktop/neurodesktop-storage/data/logs/
+logdir=~/Desktop//neurodesktop-storage/data/logs/
 ####################################################################################################
 
 # ####################################################################################################
@@ -120,12 +120,12 @@ for subj in "${subjs[@]}"; do
         for run in "${runs[@]}"; do
             
 			z=$(printf '*cmrr_att_learn_run0%d_physiolog.zip' "${run}")
-            fname=$(find ${niidir}/sub-0${subj}_*/${z})
+            fname=$(find ${niidir}sub-0${subj}_*/${z})
             fname=$(printf ${fname})
             new_name=$(basename $fname)
             new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
             echo "$new_name"
-            unzip ${fname} -d ${outpath}/sub-0${subj}/ses-0${sess}/func/${new_name} 
+            unzip "${fname}" -d "${niidir}sub-0${subj}/ses-0${sess}/${new_name}"
 #			./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess}/func -f sub-0${subj}_ses-0${sess}_physiolog_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
                 
         done
