@@ -136,7 +136,7 @@ done
 # # # # #### Remove unneeded files ####
 # # # # ####################################################################################################
 
-for subj in "${subjs[@]}"; do
+# for subj in "${subjs[@]}"; do
 
-    rm -rv ${niidir}/sub-0${subj}_*       
-done
+#     rm -rv ${niidir}/sub-0${subj}_*       
+# done
