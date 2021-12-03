@@ -25,14 +25,14 @@
 - run 
     ```get_physio_regressor_files(wd, sub)```
     
-  -  where wd is the bids directory, and sub is the subject number.
-    
+  -  where wd is the bids directory, and sub is the subject number. 
   -  Depends on extractCMRRPhysio.m being in the same folder
     
 3. rename files so they follow BIDS convention
     
     - run ```rename2BIDS``` after making sure the filepath is set correctly at the top of the script
 
+** after running fmriprep?**
 4. add 'taskName' to the bold json files to make them task compliant by running ```addtaskname2bids(wd, sub)``` in a new matlab session (depends on *JSONio* being in the same folder)
 5. copy over behavioural data from source, extract and rename event files (function forthcoming)
 6. Exit the interactive session
