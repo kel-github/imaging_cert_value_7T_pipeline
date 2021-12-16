@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+## Written by K. Garner - run fmriprep with neurodesk
+export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=6
+
+fmriprep /clusterdata/uqkgarn1/scratch/data \
+         /clusterdata/uqkgarn1/scratch/data/derivatives \
+         participant \
+         --fs-license-file \
+         /clusterdata/uqkgarn1/scratch/freesurfer.txt \
+         --output-spaces T1w MNI152NLin2009cAsym fsaverage fsnative \
+         --participant-label 01 \
+         --nprocs 6 --mem 10000 \
+         --skip_bids_validation \
+         -v

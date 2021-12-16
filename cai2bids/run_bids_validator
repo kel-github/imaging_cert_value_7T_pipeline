@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# START
+PROJPATH=/clusterdata/uqkgarn1/scratch/data
+BVALPATH=/clusterdata/uqkgarn1/scratch/my_images/
+
+module load singularity/3.4.1
+
+singularity run -c -B $PROJPATH:/data:ro \
+                      $BVALPATH/bids-validator.simg \
+                      /data
