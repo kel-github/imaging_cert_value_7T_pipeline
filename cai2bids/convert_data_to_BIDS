@@ -13,10 +13,10 @@ set -e # this command causes the script to exit on error
 ####################################################################################################
 #### Defining pathways
 ####################################################################################################
-rawloc=~/Desktop/neurodesktop-storage/data/source/
-outpath=~/Desktop/neurodesktop-storage/data/
-niidir=~/Desktop/neurodesktop-storage/data/source/
-logdir=~/Desktop//neurodesktop-storage/data/logs/
+rawloc=/clusterdata/uqkgarn1/scratch/data/source/
+outpath=/clusterdata/uqkgarn1/scratch/data/
+niidir=/clusterdata/uqkgarn1/scratch/data/source/
+logdir=/clusterdata/uqkgarn1/scratch/data/logs/
 ####################################################################################################
 
 # ####################################################################################################

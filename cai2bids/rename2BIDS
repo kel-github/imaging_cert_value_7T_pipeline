@@ -8,7 +8,7 @@ set -e # this command causes the script to exit on error
 ####################################################################################################
 #### Defining pathways
 ####################################################################################################
-datloc=~/Desktop/neurodesktop-storage/data/
+datloc=/clusterdata/uqkgarn1/scratch/data/
 
 ####################################################################################################
 
@@ -25,7 +25,11 @@ for sub in "${subjs[@]}"; do
     
     for run in "${runs[@]}"; do
         c_name=$(find ${datloc} -name sub-0${sub}_*_run-0${run}.nii)
-        nu_name=$(printf ${datloc}sub-0${sub}/ses-02/func/sub-0${sub}_ses-02_task-attlearn_run0${run}.nii)
+        nu_name=$(printf ${datloc}sub-0${sub}/ses-02/func/sub-0${sub}_ses-02_task-attlearn_run-0${run}_bold.nii)
+        mv ${c_name} ${nu_name}
+
+        c_name=$(find ${datloc} -name sub-0${sub}_*_run-0${run}.json)
+        nu_name=$(printf ${datloc}sub-0${sub}/ses-02/func/sub-0${sub}_ses-02_task-attlearn_run-0${run}_bold.json)
         mv ${c_name} ${nu_name}
     done
 done

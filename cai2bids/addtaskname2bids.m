@@ -5,7 +5,7 @@ function [flg] = addtaskname2bids(data_path, sub_num)
 % must have JSONio folder in the same folder as the function directory
 
 %% get json tools
-addpath(fullfile(pwd, 'JSONio'));
+addpath(fullfile(pwd, 'JSONio-main'));
 %% get fnames
 % first, id sub string
 if sub_num < 10
