@@ -5,7 +5,7 @@
 export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=6 # specify the number of threads you want to use
 
 mriqc /clusterdata/uqkgarn1/scratch/data \
-      /clusterdata/uqkgarn1/scratch/data/derivatives/ \
+      /clusterdata/uqkgarn1/scratch/data/derivatives/mriqc \
       participant \
       --participant-label sub-01 \
       --work-dir /clusterdata/uqkgarn1/scratch/work \
