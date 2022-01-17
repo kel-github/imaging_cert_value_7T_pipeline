@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# written by K. Garner - the purpose of this code is to run mriqc with neurodesk
+
+export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=6 # specify the number of threads you want to use
+
+mriqc /clusterdata/uqkgarn1/scratch/data \
+      /clusterdata/uqkgarn1/scratch/data/derivatives/ \
+      participant \
+      --participant-label sub-01 \
+      --work-dir /clusterdata/uqkgarn1/scratch/work \
+      --nprocs 6 --mem_gb 10000 \
+      -v
