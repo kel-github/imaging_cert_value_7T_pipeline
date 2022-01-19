@@ -1,11 +1,11 @@
 function [flag] = run_tapas_toolbox(sub_list, info)
 
 %% this function runs the tapas tool box 
-% written for use on UQ HPC e.g. awoonga
+% written for use on UQ HPC e.g. wiener, cvl
 
 % kwargs:
 % -- sub_list = the list of subjects submitted to the job - e.g. {'01',
-% '02'...} etc
+% '02'...} etc. Note: is string
 % -- info = a structure of variables containing the following information:
 %    -- sess = session number: e.g. 2
 %    -- nrun = number of runs for that participant
@@ -16,13 +16,10 @@ function [flag] = run_tapas_toolbox(sub_list, info)
 %    -- nscans = number of scans for each run: vector of size: (1, nrun)
 
 %% first, add critical things to path and get environment variables
-%tmpdir = getenv('TMPDIR');
-tmpdir = pwd; % for debugging
-arr_num = str2num(getenv('PBS_ARRAY_INDEX'));
-arr_num = 1; % for debugging
-this_sub = sub_list{arr_num};
-addpath(fullfile(tmpdir, 'spm12', 'spm12'));
 
+tmpdir = pwd; % for debugging
+nsubs = length(sub_list);
+addpath(fullfile(tmpdir, 'spm12', 'spm12'));
 
 % variables from info structure
 sess = info.sess;
