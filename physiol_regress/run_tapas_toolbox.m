@@ -14,6 +14,9 @@ function [flag] = run_tapas_toolbox(sub_list, info)
 %    -- respiration_files = same as above but for the resp files
 %    -- scan_timing = info file from Siemens
 %    -- nscans = number of scans for each run: vector of size: (1, nrun)
+%    -- movement = a cell of the movement regressor files for that
+%    participant (1, nrun) [.txt in format for use with
+%    SPM]
 
 %% first, add critical things to path and get environment variables
 
@@ -28,6 +31,7 @@ cardiac_files = info.cardiac_files;
 respiration_files = info.respiration_files;
 scan_timing = info.scan_timing;
 nscans = repmat(info.nscans, 1, nrun);
+movement = info.movement;
 
 %% initialise spm
 spm_jobman('initcfg'); % check this for later
