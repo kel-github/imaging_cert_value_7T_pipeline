@@ -8,9 +8,9 @@
 
 The following steps assume that you have [spm](https://en.wikibooks.org/wiki/SPM) on your matlab filepath, with the [physIO toolbox installed](https://github.com/translationalneuromodeling/tapas/tree/master/PhysIO). 
 
-First we need to generate the info structures for each participant. This is a variable saved as a matfile for each participant in the subject data in 'derivatives' which contains the subject specific details that PhysIO needs to know to run. <p>
+First we need to generate the info structures for each participant. This is a structure saved as a matfile for each participant in the subject data in 'derivatives' which contains the subject specific details that PhysIO needs to know to run. <p>
 
-    * To do this first open the m file 'generate_sub_info_structure'
+    * To do this first open the m file 'generate_sub_physio_info_file' - see the comments in the function for input argument details.
 
 
 
