@@ -7,10 +7,10 @@ import numpy as np
 import os, re, json
 
 # %%
-data_dir = '/clusterdata/uqkgarn1/scratch/data/'
-subject_number = '01' 
-session_number = pd.Series(str(2)) # this assumes data is in BIDS
-runs = pd.Series(str(x) for x in [1, 2, 3])
+# data_dir = '/clusterdata/uqkgarn1/scratch/data/'
+# subject_number = '01' 
+# session_number = pd.Series(str(2)) # this assumes data is in BIDS
+# runs = pd.Series(str(x) for x in [1, 2, 3])
 
 def list_files(data_dir, subject_number, session_number, runs, task):
     """create a list of regressor filenames for given subject
