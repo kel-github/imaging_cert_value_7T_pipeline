@@ -3,7 +3,7 @@
 % spm SPM - SPM12 (7771)
 % cfg_basicio BasicIO - Unknown
 %-----------------------------------------------------------------------
-matlabbatch{1}.spm.tools.physio.save_dir =  '<UNDEFINED>'; % 1
+matlabbatch{1}.spm.tools.physio.save_dir = '<UNDEFINED>'; % 1
 matlabbatch{1}.spm.tools.physio.log_files.vendor = 'Siemens_Tics';
 matlabbatch{1}.spm.tools.physio.log_files.cardiac = '<UNDEFINED>'; % 2
 matlabbatch{1}.spm.tools.physio.log_files.respiration = '<UNDEFINED>'; % 3
@@ -16,7 +16,7 @@ matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.NslicesPerBeat = [];
 matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.TR = 1.51;
 matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.Ndummies = 0;
 matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.Nscans = '<UNDEFINED>'; % 5
-matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.onset_slice = '<UNDEFINED>'; % 6
+matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.onset_slice = 1; 
 matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.time_slice_to_slice = [];
 matlabbatch{1}.spm.tools.physio.scan_timing.sqpar.Nprep = [];
 matlabbatch{1}.spm.tools.physio.scan_timing.sync.nominal = struct([]);
@@ -28,8 +28,8 @@ matlabbatch{1}.spm.tools.physio.preproc.cardiac.initial_cpulse_select.auto_templ
 matlabbatch{1}.spm.tools.physio.preproc.cardiac.posthoc_cpulse_select.off = struct([]);
 matlabbatch{1}.spm.tools.physio.preproc.respiratory.filter.passband = [0.01 2];
 matlabbatch{1}.spm.tools.physio.preproc.respiratory.despike = true;
-matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = '<UNDEFINED>'; % 7
-matlabbatch{1}.spm.tools.physio.model.output_physio = 'physio.mat';
+matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = '<UNDEFINED>'; % 6
+matlabbatch{1}.spm.tools.physio.model.output_physio = '<UNDEFINED>'; % 7
 matlabbatch{1}.spm.tools.physio.model.orthogonalise = 'none';
 matlabbatch{1}.spm.tools.physio.model.censor_unreliable_recording_intervals = true; %false; 
 matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.c = 3;
@@ -38,7 +38,7 @@ matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.cr = 1;
 matlabbatch{1}.spm.tools.physio.model.rvt.no = struct([]);
 matlabbatch{1}.spm.tools.physio.model.hrv.no = struct([]);
 matlabbatch{1}.spm.tools.physio.model.noise_rois.no = struct([]);
-matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = {'<UNDEFINED>'};
+matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = '<UNDEFINED>'; %8
 matlabbatch{1}.spm.tools.physio.model.movement.yes.order = 6;
 matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_method = 'FD';
 matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.5;

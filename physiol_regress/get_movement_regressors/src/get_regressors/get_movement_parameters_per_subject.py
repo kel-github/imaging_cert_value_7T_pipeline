@@ -2,15 +2,13 @@
 # functions for getting motion regressors
 ### written by K. Garner, 2022
 
-import pandas as pd
-import numpy as np
-import os, re, json
 
 # %%
-# data_dir = '/clusterdata/uqkgarn1/scratch/data/'
+# data_dir = '/clusterdata/uqkgarn1/scratch/data/' (Note: don't use expansion tilde!)
 # subject_number = '01' 
 # session_number = pd.Series(str(2)) # this assumes data is in BIDS
 # runs = pd.Series(str(x) for x in [1, 2, 3])
+# task = 'attlearn' (string, name of task for BIDS)
 
 def list_files(data_dir, subject_number, session_number, runs, task):
     """create a list of regressor filenames for given subject
@@ -30,7 +28,7 @@ def list_files(data_dir, subject_number, session_number, runs, task):
     return [tmplt.format(sub, sess, t, run) for sub in subject_number for sess in session_number for t in task for run in runs]
 
 
-def printNewJson(fname, data): # function to print json file, given fname (str) and data = {}
+def print_new_json(fname, data): # function to print json file, given fname (str) and data = {}
     """print json file to fname, containing data
 
     Args:
@@ -73,7 +71,12 @@ def print_motion_regressors_for_spm(confounds_fname):
                                   'trans_z', 'trans_z_derivative1',
                                   'rot_x', 'rot_x_derivative1',
                                   'rot_y', 'rot_y_derivative1',
-                                  'rot_z', 'rot_z_derivative1']}
-    printNewJson(motionfname_json, motion_json_data)
+                                  'rot_z', 'rot_z_derivative1'],
+                        "source":savefname}
+    print_new_json(motionfname_json, motion_json_data)
     return savefname
 
+
+
+
+# %%
