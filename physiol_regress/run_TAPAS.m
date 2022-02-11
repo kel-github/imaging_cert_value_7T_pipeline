@@ -9,6 +9,8 @@
 % before running spm jobman
 % assumes data is in BIDS format
 
+clear all
+
 %% load participant info
 sub = '01';
 dat_path = '/home/kellygarner/Insync/tmp-data/phys_regress/';
@@ -30,7 +32,7 @@ spm('defaults', 'FMRI');
           
 %% run through runs, print info and run 
 
-for irun = 1:nrun
+for irun = 1:1
     
     matlabbatch{1}.spm.tools.physio.save_dir = cellstr(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func')); % 1
     matlabbatch{1}.spm.tools.physio.log_files.vendor = 'Siemens_Tics';
@@ -57,8 +59,8 @@ for irun = 1:nrun
     matlabbatch{1}.spm.tools.physio.preproc.cardiac.posthoc_cpulse_select.off = struct([]);
     matlabbatch{1}.spm.tools.physio.preproc.respiratory.filter.passband = [0.01 2];
     matlabbatch{1}.spm.tools.physio.preproc.respiratory.despike = true;
-    matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = 'mregress.txt'; %cellstr(sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motionphysregress_timeseries.txt', sub, task, irun)); % 6
-    matlabbatch{1}.spm.tools.physio.model.output_physio = 'physio'; %sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio', sub, task, irun); % 7
+    matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motionphysregress_timeseries.txt', sub, task, irun); 
+    matlabbatch{1}.spm.tools.physio.model.output_physio = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio', sub, task, irun); % 7
     matlabbatch{1}.spm.tools.physio.model.orthogonalise = 'none';
     matlabbatch{1}.spm.tools.physio.model.censor_unreliable_recording_intervals = true; %false; 
     matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.c = 3;
@@ -72,8 +74,8 @@ for irun = 1:nrun
     matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_method = 'FD';
     matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.5;
     matlabbatch{1}.spm.tools.physio.model.other.no = struct([]);
-    matlabbatch{1}.spm.tools.physio.verbose.level = 2;
-    matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = '';
+    matlabbatch{1}.spm.tools.physio.verbose.level = 1;
+    matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio-fig', sub, task, irun);
     matlabbatch{1}.spm.tools.physio.verbose.use_tabs = false;
     
     spm_jobman('run', matlabbatch);
