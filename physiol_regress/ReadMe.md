@@ -10,7 +10,7 @@ The following steps assume that you have [spm](https://en.wikibooks.org/wiki/SPM
 
 First we need to generate the info structures for each participant. This is a structure saved as a matfile for each participant in the subject data in 'derivatives' which contains the subject specific details that PhysIO needs to know to run. <p>
 
-    * To do this first open the m file 'generate_sub_physio_info_file' - see the comments in the function for input argument details.
+    * To do this use the matlab function: 'generate_sub_physio_info_file' - see the comments in the function for input argument details.
 
 
 

@@ -3,54 +3,171 @@
 # K. Garner, 2019
 # --------------------------------------------------------------------
 
-get_event_times_data <- function(sub, ses, data_dir, TR, sub_str, run){
+get_mri_fnames <- function(i, fn, TR, nruns, ses_type, data_path){
+  # get the filenames for given subject i, and sessions in j (can be plural)
+  # key args
+  # -- i = subject number
+  # -- fn = file name pattern (string)
+  # -- TR = TR used for acquisition
+  # -- nruns = total number of runs
+  # -- ses_type = name of folder containing data (e.g. "beh")
+  # -- data_path = where is the top level of the data (Assumes BIDS)
+  if (i < 10){
+    sub_str = "sub-00%d"
+  } else if (i > 9 & i < 100) {
+    sub_str = "sub-0%d"
+  } else {
+    sub_str = "sub-%d"
+  }
+  fn <- paste(sub_str, fn, sep="")
+  get_session_strings <- function(x) dir(sprintf(paste(data_path, sub_str, "ses-02", ses_type, sep = "/"), i), pattern=sprintf(fn, i, TR, x), full.names = TRUE)
+  do.call(cbind, lapply(1:nruns, get_session_strings))
+}
+
+get_event_times_data <- function(fn){
    # use this function to load the behavioural log file, remove extraneous events, amd code the events 
-   ####### first load up event file, cut extraneous events and number trials
+  # --fn: the full file path to the event file, attained using get_mri_fnames
+  ####### first load up event file, cut extraneous events and number trials
   
-   #### note: have found a minor issue with timing 
-   pn <- 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_events.tsv'
-   fPath = sprintf(paste(data_dir, 'sub-0%d/ses-0%d/func/', pn, sep=""), sub, ses, sub, ses, TR)
-   event.times = read.table(file = fPath, sep = '\t', header = TRUE)
+   event.times = read.table(file = fn, sep = '\t', header = TRUE)
    # if required, chop off everything prior to the onset of the first dummy scan
-   n.pre = which(event.times$event=="dummy scan")[1]-1
+   # see https://github.com/kel-github/imaging-cert-reward-att-task-code/blob/master/sess-mri-exp/run_mri_session.m
+   # for code that shows that trimming the first pulse value is necessary, as it is a dummy
+   # value used to get the event file writing started
+   n.pre = which(event.times$event=="dummy scan")[1]-1 
+   # what is the impact for timing?
    if (any(as.logical(n.pre))) event.times = event.times[-c(1:n.pre),]
    event.times$rel.onset = event.times$onset - event.times$onset[1]
    # all events are recorded for every trial (see experimental code), so can just number trials according to the 
    # following simple algorithm
    n.dummy = which(event.times$event == "end dummy")
    t.trials = 128
-   t.events = 6
+   t.events = 5
    all.trials = rep(1:t.trials, each=t.events)
-
+  
+   # code events of interest with a specific value
    event.times$e = 0
-   events = c("value cues", "spatial cue", "target", "response", "feedback", "final fix")
+   events = c("value cues", "spatial cue", "target", "response", "feedback")
    vals = c(1:length(events))
    for (i in 1:length(events)) event.times$e[event.times$event == events[i]] = vals[i]
    
    
    if (length(event.times$onset)-n.dummy != (t.trials*t.events)){ # if for some reason you don't have all the trials
         # get the last trial for which you have a complete set of events
-      last.trial = max(which(event.times$event == "final fix")) 
+      last.trial = max(which(event.times$event == "pulse - end trial")) 
       if (last.trial < nrow(event.times)) event.times$e[(last.trial+1):nrow(event.times)]=0  # if we ended at the end of a trial, don't do anything, otherwise....
    } 
 
    # ditch rows that are not part of a trial
-   event.times[event.times$e != 0, ]
+   event.times = event.times[event.times$e != 0, ]
    # correctly assign trial numbers
    t.start = which(event.times$e==1)
-   t.end = which(event.times$e==6)
+   t.end = which(event.times$e==5)
    ts = 1:length(t.start)
    event.times$t = 0
    for (i in ts) event.times$t[c(t.start[i]:t.end[i])] = i
    event.times
 }
 
+get_mri_dat <- function(subject, session, data_path, ses_type, fn, TR, runs, sep = "\t"){
+  # this function takes the filenames produced by get_mri_fnames, and 
+  # reads in the data from each, outputting a longform dataframe
+  # key args
+  # -- subject: subject number from which you wish to get data
+  # -- sessions: session numbers, should be one list, same across all subjects
+  # -- ses_type = "behav" or "func"
+  # -- fn = filename pattern, to be linked to subject str
+  # -- TR = TR used for acquisition
+  # -- runs = n runs from session
+  # -- sep = separator pattern in the data file
+  files <- do.call(rbind, lapply(subjects, get_mri_fnames, fn=fn, TR=TR, nruns=runs, ses_type=ses_type, data_path = data_path))
+  rownames(files) <- subjects
+  colnames(files) <- 1:runs
+  resplog <- function(i, j) {
+    tmp = read.table(files[as.character(i),as.character(j)], sep = sep, header = TRUE)
+    tmp$sub = i
+    tmp$sess = session
+    tmp$run = j
+    tmp
+  }
+  
+  d <- lapply(1:nruns, function (j) resplog(subject, j))
+  d
+}
 
-get_conditions <- function(sub, ses, data_dir, TR){
+allocate_conditions_on_d <- function(d){
+  # allocate factors to the dataset d (output by either get_dat or get_fmri_dat)
+  # ALLOCATE CUE CONDITIONS
+  
+  d$cert <- NA
+  d$cert[ d$probability == 1 & d$position == 0 ] = ".8"
+  d$cert[ d$probability == 1 & d$position == 1 ] = ".2"
+  d$cert[ d$probability == 2 & d$position == 1 ] = ".8"
+  d$cert[ d$probability == 2 & d$position == 0 ] = ".2"
+  d$cert[ d$probability == 3 ] = ".5"
+  d$cert <- as.factor(d$cert)
+  
+  d$reward_type <- as.factor(d$reward_type)
+  levels(d$reward_type) <- c("htgt/hdst", "htgt/ldst", "ltgt/ldst", "ltgt/hdst")
+  
+  d
+}
+
+
+get_participant_data_from_mri_session <- function(subjects, sessions, data_path, TR=1510, runs, ses_type = "beh") {
+  
+  
+  fn = "_ses-02_task-learnAtt_acq-TR%d_run-0%d_trls.tsv"
+  d = do.call(rbind, lapply(subjects, get_mri_dat, sessions=sessions, data_path=data_path, ses_type=ses_type, fn=fn, TR=TR, runs=runs))
+  
+  fn = "_ses-02_task-learnAtt_acq-TR%d_run-0%d_trls_tbl.txt"
+  t = do.call(rbind, lapply(subjects, get_mri_dat, sessions=sessions, data_path=data_path, ses_type=ses_type, fn=fn, TR=TR, runs=runs, sep=","))
+  names(t)[names(t)=="trial_num"] = "t"
+  
+  d <- inner_join(d, t, by=c("sub", "run", "t", "sess"))
+  d <- allocate_conditions_on_d(d)
+  d
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+get_conditions <- function(sub_str, ses, data_dir, TR, run){
   # use this function to get a dataframe of the trial events and associated responses
   # also adds the deviation of each trial from the expected value of the stimulus
-  pn <- 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_trls.tsv'
-  fPath = sprintf(paste(data_dir, 'sub-0%d/ses-0%d/func/', pn, sep=""), sub, ses, sub, ses, TR)
+  # --sub_str = string denoting subject number - e.g. '001' 
+  # --ses = number, denoting the session, e.g. 2
+  # --data_dir: path to top level of data, assuming BIDS format
+  # --TR: a number, e.g. 1510
+  # --run: a number denoting the run number, e.g. 1
+  ####### first load up event file, cut extraneous events and number trials
+  
+  pn <- 'sub-0%s_ses-0%d_task-learnAtt_acq-TR%d_run-0%d_trls.tsv'
+  fPath = sprintf(paste(data_dir, 'sub-0%s/ses-0%d/beh/', pn, sep=""), sub_str, ses, sub_str, ses, TR, run)
   trls = read.table(file = fPath, sep = '\t', header = TRUE)
   pn <- 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_trls_tbl.txt'
   fPath = sprintf(paste(data_dir, 'sub-0%d/ses-0%d/func/', pn, sep=""), sub, ses, sub, ses, TR)
@@ -122,18 +239,10 @@ match_conditions_to_events <- function(event.times, trls, ses){
 get_data_for_sub_and_sess <- function(sub, ses, data_dir, TR){
   # use this function to apply get_event_times_data, get_conditions and 
   # match_conditions_to_events to one sub, ses & TR
-  event.times = get_event_times_data(sub, ses, data_dir, TR)
+  event.times = get_event_times_data(sub_str, ses, data_dir, TR, run)
   trls = get_conditions(sub, ses, data_dir, TR)
   sub.dat = match_conditions_to_events(event.times, trls, ses)
   list(sub.dat %>% arrange(rel.onset))
-}
-
-
-model_mat_for_session <- function(all.events){
-  # use this function to make a model matrix for this session
-  # out put is a plot of the model matrix
-  mat = model.matrix( ~loc+cue+reward_type+exp+rt+or, data=all.events[all.events$event == "value cues", ]  )
-  image(mat)
 }
 
 get_subs_hands <- function(sub, ses, data_dir, TR){
