@@ -80,8 +80,8 @@ get_mri_dat <- function(subject, session, data_path, ses_type, fn, TR, runs, sep
   # -- TR = TR used for acquisition
   # -- runs = n runs from session
   # -- sep = separator pattern in the data file
-  files <- do.call(rbind, lapply(subjects, get_mri_fnames, fn=fn, TR=TR, nruns=runs, ses_type=ses_type, data_path = data_path))
-  rownames(files) <- subjects
+  files <- do.call(rbind, lapply(subject, get_mri_fnames, fn=fn, TR=TR, nruns=runs, ses_type=ses_type, data_path = data_path))
+  rownames(files) <- subject
   colnames(files) <- 1:runs
   resplog <- function(i, j) {
     tmp = read.table(files[as.character(i),as.character(j)], sep = sep, header = TRUE)
@@ -113,137 +113,82 @@ allocate_conditions_on_d <- function(d){
   d
 }
 
-
-get_participant_data_from_mri_session <- function(subjects, sessions, data_path, TR=1510, runs, ses_type = "beh") {
+match_behaviour_to_event_timings <- function(dat, evs){
+  # using the behaviour info that has been through 'allocate_conditions_on_d'
+  # and the event timings info in evs, find the times and onsets for
+  # each condition of interest.
+  # conditions of interest are:
+  # Left| Right tgt x Spatial Cue (.2, .5, .8) x Value Cues
+  # Assuming modelling via delta stick from onset of value cues
+  # Args:
+  # -- dat [dataframe] produced using a combination of get_mri_dat (on task and behav data)
+  #                    and 'allocate_conditions_on_d'
+  # -- evs [dataframe] event timings from the run matching dat, acquired using 'get_event_times_data'
+  # Returns:
+  # list of names, onsets and durations of each condition, for use with make_spm_event_files
+  sess_data <- inner_join(dat, evs[evs$event == "value cues",], by = "t")
   
+  tgt_locs <- c("left", "right")
+  spatial_cue_types <- unique(sess_data$cert)
+  value_cue_types <- unique(sess_data$reward_type)
   
-  fn = "_ses-02_task-learnAtt_acq-TR%d_run-0%d_trls.tsv"
-  d = do.call(rbind, lapply(subjects, get_mri_dat, sessions=sessions, data_path=data_path, ses_type=ses_type, fn=fn, TR=TR, runs=runs))
+  names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
+  names = sort(as.vector(outer(names, value_cue_types, paste, sep = "_")))
   
-  fn = "_ses-02_task-learnAtt_acq-TR%d_run-0%d_trls_tbl.txt"
-  t = do.call(rbind, lapply(subjects, get_mri_dat, sessions=sessions, data_path=data_path, ses_type=ses_type, fn=fn, TR=TR, runs=runs, sep=","))
-  names(t)[names(t)=="trial_num"] = "t"
+  nleft <- length(names)/2
+  nspat <- nleft/3
+  nval <- length(value_cue_types)
   
-  d <- inner_join(d, t, by=c("sub", "run", "t", "sess"))
-  d <- allocate_conditions_on_d(d)
-  d
-} 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-get_conditions <- function(sub_str, ses, data_dir, TR, run){
-  # use this function to get a dataframe of the trial events and associated responses
-  # also adds the deviation of each trial from the expected value of the stimulus
-  # --sub_str = string denoting subject number - e.g. '001' 
-  # --ses = number, denoting the session, e.g. 2
-  # --data_dir: path to top level of data, assuming BIDS format
-  # --TR: a number, e.g. 1510
-  # --run: a number denoting the run number, e.g. 1
-  ####### first load up event file, cut extraneous events and number trials
+  sess_data$loc <- as.factor(sess_data$loc)
+  levels(sess_data$loc) <- c("left", "right")
   
-  pn <- 'sub-0%s_ses-0%d_task-learnAtt_acq-TR%d_run-0%d_trls.tsv'
-  fPath = sprintf(paste(data_dir, 'sub-0%s/ses-0%d/beh/', pn, sep=""), sub_str, ses, sub_str, ses, TR, run)
-  trls = read.table(file = fPath, sep = '\t', header = TRUE)
-  pn <- 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_trls_tbl.txt'
-  fPath = sprintf(paste(data_dir, 'sub-0%d/ses-0%d/func/', pn, sep=""), sub, ses, sub, ses, TR)
-  xtra.info = read.table(file = fPath, sep = ',', header = TRUE)
-  names(xtra.info)[1] = "t"
-  xtra.info = subset(xtra.info, select= -c(probability, position, ccw, hrz, block_num, reward_trial))
-  trls = inner_join(trls, xtra.info, by="t")
-  
-  # conditions to assign
-  # only correct responses:
-  # h/h 80 L, h/h 80 R, h/h 50 L, h/h 50 R, h/h 20 L, h/h 20 R, 
-  # l/l 80 L, l/l 80 R, l/l 50 L, l/l 50 R, l/l 20 L, l/l 20 R,
-  # l/h 80 L, l/h 80 R, l/h 50 L, l/h 50 R, l/h 20 L, l/h 20 R,
-  # h/l 80 L, h/l 80 R, h/l 50 L, h/l 50 R, h/l 20 L, h/l 20 R,
-  # cw, ccw
-  # exp high, exp low, unexp high, unexp low
-  trls$reward_type = as.factor(trls$reward_type)
-  levels(trls$reward_type) = c("ll", "lh", "hh", "hl")
-  trls$cue = as.factor(trls$cue)
-  levels(trls$cue) <- c(".8", ".2", ".5")
-  trls$loc = as.factor(trls$loc)
-  levels(trls$loc) = c("left", "right")
-  trls$valid = NA
-  trls$valid[ trls$cue == ".8" & trls$loc == "left" ] = "valid" # correctly coded .8 (for current purposes but not for running the task, this applies to the below also)
-  trls$valid[ trls$cue == ".8" & trls$loc == "right" ] = "invalid" # incorrectly coded .8
-  trls$valid[ trls$cue == ".2" & trls$loc == "left" ] = "invalid" # correctly coded .2
-  trls$valid[ trls$cue == ".2" & trls$loc == "right" ] = "valid"  # incorrectly coded .2
-  trls$valid[ trls$cue == ".5" ] = "valid"
-  
-  # now add regressors that define left_p.8, left_p.5, right_p.8, right_p.5
-  trls$cue_cond = NA
-  trls$cue_cond[ trls$cue == ".8" & trls$loc == "left" ] = "att_left_8"
-  trls$cue_cond[ trls$cue == ".5" & trls$loc == "left" ] = "att_left_5"
-  trls$cue_cond[ trls$cue == ".2" & trls$loc == "right" ] = "att_right_8"
-  trls$cue_cond[ trls$cue == ".5" & trls$loc == "right" ] = "att_right_5" 
-  trls$cue_cond <- as.factor(trls$cue_cond)
-  # # recode so all .8's refer to valid trials, and .2's refer to invalid
-  # trls$cue[ trls$valid == "valid" &  trls$loc == "right" & trls$cue == ".2"] = ".8"
-  # trls$cue[ trls$valid == "invalid" & trls$loc == "right" & trls$cue == ".8"] = ".2"
-  # 
-  # trials are already marked as correct or incorrect 
-  # (see resp variable, and do_response_score.m from the associated matlab code)
-  trls$exp[trls$reward_type == "hh" & trls$rew_tot > 11] = "exp_high"
-  trls$exp[trls$reward_type == "hl" & trls$rew_tot > 11] = "exp_high"
-  trls$exp[trls$reward_type == "lh" & trls$rew_tot > 11] = "unexp_high"
-  trls$exp[trls$reward_type == "ll" & trls$rew_tot > 11] = "unexp_high"
-  trls$exp[trls$reward_type == "hh" & trls$rew_tot < 11] = "unexp_low"
-  trls$exp[trls$reward_type == "hl" & trls$rew_tot < 11] = "unexp_low"
-  trls$exp[trls$reward_type == "lh" & trls$rew_tot < 11] = "exp_low"
-  trls$exp[trls$reward_type == "ll" & trls$rew_tot < 11] = "exp_low"
-  trls$exp = as.factor(trls$exp)
-  trls$sub <- as.factor(trls$sub)
-  trls$TR = TR
-  trls
+  onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z],
+                                      x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,],
+                                      y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,],
+                                      z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,],
+                   SIMPLIFY = FALSE)
+  durations <- lapply(onsets, function(x) rep(0, length(x)))
+  out <- list(names, onsets, durations)
+  names(out) <- c("names", "onsets", "durations")
+  out
 }
 
-match_conditions_to_events <- function(event.times, trls, ses){
-  # this function will take dataframes event.times & trls, and match them together to get one dataframe
-  # will also ditch the columns of no interest
+write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num){
+  # given the events list for spm, produced using 'events_4_spm'
+  # write a json file for each run in the BIDS directory defined by fpath
+  # Args:
+  # -- events_4_spm [list]: list of events for each run, produced
+  #                          using mapply(match_behaviour_to_event_timings)
+  # -- fpath [str]: the location of the BIDS directory of choice
+  # -- sub_num [int]: subject number
+  # Outputs: 
+  # -- a json file of names, onsets and durations for each run, printed to the 
+  #                          BIDS directory of choice
+  jsondata = list(names=unlist(events_4_spm$names),
+                  onsets=unname(events_4_spm$onsets),
+                  durations=unname(events_4_spm$durations))
+  
+  if (sub_num < 10){
+    sub_str = "sub-00%d"
+  } else if (sub_num > 9 & sub_num < 100) {
+    sub_str = "sub-0%d"
+  } else {
+    sub_str = "sub-%d"
+  }
+  
+  write_json(jsondata, sprintf(paste(fpath, "/",
+                                     sub_str, 
+                                     "/",  
+                                     'ses-02/', 
+                                     'beh/', 
+                                     sub_str,
+                                     '_ses-02_task-attlearn_run-%d_desc-glm-onsets.json', sep=''), 
+                                      sub_num, sub_num, run_num)) 
   
   
-  trls = subset(trls, select= -c(co1, co2, loc, cue))
-  all.events = inner_join(trls, event.times, by="t")
-  all.events$sess = ses
-  all.events
 }
 
 
-get_data_for_sub_and_sess <- function(sub, ses, data_dir, TR){
-  # use this function to apply get_event_times_data, get_conditions and 
-  # match_conditions_to_events to one sub, ses & TR
-  event.times = get_event_times_data(sub_str, ses, data_dir, TR, run)
-  trls = get_conditions(sub, ses, data_dir, TR)
-  sub.dat = match_conditions_to_events(event.times, trls, ses)
-  list(sub.dat %>% arrange(rel.onset))
-}
 
 get_subs_hands <- function(sub, ses, data_dir, TR){
   # use this function to find which orientation -> response mapping each participant had
@@ -258,117 +203,5 @@ get_subs_hands <- function(sub, ses, data_dir, TR){
   }
   cw
 }
-
-get_event_info <- function(cond, fact, ev, data){
-  # use this function to extract the relevant onsets and durations for the specified condition
-  # output = a list called event_data containing condition name, onsets and durations
-  # inputs = cond = a string, specifying condition of interest - e.g. left (for left sided target)
-  #          fact = a string, denoting the factor to which the condition belongs
-  #          ev = a string, specifying the relevant trial event for that condition
-  #          data = a dataframe, produced by using the function 'match_conditions_to_events"
-  #          correct = a logical vector, denoting true for correct responses, false for not
-  #          i = idx for the cond, fact, and ev vectors - this solution is applied as mapply was being 
-  #          glitchy with passing in a dataframe to the MoreArgs function
-
-  names=cond
-  onsets=data[ (data[,match(parse(text=fact), colnames(data))] == cond) & data$event == ev, ]$rel.onset
-  onsets=onsets[!is.na(onsets)]
-  if (fact == "hand") {
-    durations=abs(data[ (data[,match(parse(text=fact), colnames(data))] == cond) & data$event == ev, ]$duration)
-  } else{
-    durations=0
-  }
-  event_data=list(names=names, onsets=onsets, durations=durations)
-  event_data
-}
-
-do.print.of.events <- function(stem, data, sub, ses, TR, data_dir){
-  # use this function to print a specific list to a text file, each row is one list entry
-  # output is actually space separated, will require conversion to tab separated
-  pn <- paste('sub-0%d/ses-0%d/func/', 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_', stem, '.tsv', sep="")
-  fPath = sprintf(paste(data_dir, pn, sep=""), sub, ses, sub, ses, TR)
-  lapply(data, write, fPath, sep="\t", append=TRUE, ncolumns=1000)
-}
-
-make_spm_event_files <- function(all.events, cw, sub, ses, TR, data_dir){
-  # use this function to make an spm mat file - this can be taken to not only run analysis but also
-  # to check for linear independence etc
-  # output is a json file
-  # cw =output from get_subs_hands
-  all.events$or = as.factor(all.events$or)
-  levels(all.events$or) <- c("cw", "ccw")
-  all.events = rbind( all.events %>% filter(or == "cw") %>% mutate(hand = paste(cw[1], "hand", sep="_")), all.events %>% filter(or == "ccw") %>% mutate(hand = paste(cw[2], "hand", sep="_"))) 
-  all.events = all.events %>% arrange( rel.onset ) 
-  all.events$hand = with(all.events, as_factor(hand))
-  
-  #fact.names = c("loc", "cue", "reward_type", "exp", "hand")
-  fact.names = c("cue_cond", "reward_type", "exp", "hand")
-  # make the names vector
-  conditions = unlist(sapply(fact.names, function(x) with(all.events, levels(eval(parse(text = x))))))
-  # conditions = conditions[conditions != ".2"] # removing invalid trials
-  # now make an onsets list, where each entry is the vector of onsets given that event
-  # first defining vector that matches names in terms of the particular event that needs to be referenced to get onsets
-  # factor.idx = c(rep("loc", times=2),
-  #                rep("cue", times=2),
-  #                rep("reward_type", times=4),
-  #                rep("exp", times=4),
-  #                rep("hand", times=2))
-  
-  factor.idx = c(rep("cue_cond", times=4),
-                 rep("reward_type", times=4),
-                 rep("exp", times=4),
-                 rep("hand", times=2))
-  
-  # event_idx =  c( rep("target", times = 2 ), # for left and right tgts
-  #                 rep("spatial cue", times = 2), # for the 3 probability conditions
-  #                 rep("value cues", times=4), # for ll, lh, hh, hl
-  #                 rep("feedback", times=4),
-  #                 rep("target", times=2)) # for exp_hi, exp_lo, unexp_hi, unexp_lo
-  event_idx =  c( rep("spatial cue", times = 4), # for the 3 probability conditions
-                  rep("value cues", times=4), # for ll, lh, hh, hl
-                  rep("feedback", times=4),
-                  rep("target", times=2)) # for exp_hi, exp_lo, unexp_hi, unexp_lo
-  
-  correct = all.events$resp > 0
-  tmp = all.events[correct, ]
-  
-  # idea is to combine mapply for the different vectors and apply a transmute/ddplyesque wrangle of the data
-  # to get a list, for the onsets for each of the items in 'conditions'
- 
-  events_for_spm = mapply(get_event_info, cond=conditions, fact=factor.idx, ev=event_idx, MoreArgs=list(data=tmp), SIMPLIFY=FALSE)
-
-  # modelling the onset of the target with a duration lasting the RT for that trial - given the information in this article comparing models
-  # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2654219/
-  
-
-  # add single regressor for invalid trials
-  events_for_spm = c(events_for_spm, list(list(names="invalid", onsets=tmp[tmp$valid == "invalid" & tmp$event == "target",]$rel.onset, durations=tmp[tmp$valid == "invalid" & tmp$event == "target",]$duration)))
-  # add single regressor for incorrect responses, following this advice from jiscmail: https://www.jiscmail.ac.uk/cgi-bin/webadmin?A2=spm;dc7d82cf.1103
-  events_for_spm = c(events_for_spm, list(list(names="error", onsets=all.events[all.events$resp < 1 & all.events$event=="target", ]$rel.onset, durations=0)))
-  
-  ### now append the desired elements together
-  idx = c(1:15) 
-  all.names=c()
-  all.onsets=c()
-  all.durations=c()
-  names = unlist( lapply(idx, function(x, lista, listb) append(lista, listb[[x]]$names), lista=all.names, listb=events_for_spm) )
-  onsets =  sapply( idx, function(x, lista, listb) append( lista, list(listb[[x]]$onsets)), lista=all.onsets, listb=events_for_spm    )
-  durations = sapply( idx, function(x, lista, listb) append( lista, list(listb[[x]]$durations)), lista=all.durations, listb=events_for_spm    )
-  
-  # now print the lists to text files
-  stems = c('names', 'onsets', 'durations')
-  print.data = list(names, onsets, durations)
- 
-  #mapply(do.print.of.events, stem=stems, data=print.data, MoreArgs=list(sub=sub, ses=ses, TR=TR, data_dir=data_dir))
-  # write json file here
-  jsondata = list(names=names,
-                  onsets=onsets,
-                  durations=durations)
-  write_json(jsondata, sprintf(paste(data_dir, 'sub-0%d/', 'ses-0%d/', 'func/', 'sub-0%d_ses-0%d_task-learnAtt_acq-TR%d_glm_onsets.json', sep=''), sub, ses, sub, ses, TR))
-}
-
-
-  
-
 
 
