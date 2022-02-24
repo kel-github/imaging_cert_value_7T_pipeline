@@ -13,7 +13,7 @@ clear all
 
 %% load participant info
 sub = '01';
-dat_path = '/home/kellygarner/Insync/tmp-data/phys_regress/';
+dat_path = '/clusterdata/uqkgarn1/scratch/data/derivatives/fmriprep/';
 task = 'attlearn';
 load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
               sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
