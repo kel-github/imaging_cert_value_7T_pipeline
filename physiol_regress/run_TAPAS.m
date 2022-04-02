@@ -19,7 +19,7 @@ load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
               sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
           
 % set variables
-nrun = info.nrun;
+nrun = 2 %info.nrun;
 nscans = info.nscans;
 cardiac_files = info.cardiac_files;
 respiration_files = info.respiration_files;
@@ -81,5 +81,6 @@ for irun = 1:nrun
     matlabbatch{1}.spm.tools.physio.verbose.use_tabs = false;
     
     spm_jobman('run', matlabbatch);
-
 end
+
+
