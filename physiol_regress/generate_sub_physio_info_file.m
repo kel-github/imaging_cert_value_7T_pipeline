@@ -4,7 +4,7 @@ function [flg] = generate_sub_physio_info_file(subject_number, session_number, d
 % each subject
 % -- inputs (to be defined in definitions section below): 
 %    -- subject_number: is string
-%    -- session_number: interger
+%    -- session_number: integer
 %    -- data_dir: a string containing the data directory where 'sub-xx'
 %    will be found
 %    -- fprep_folder: where is the derivative/pre-processed data?
