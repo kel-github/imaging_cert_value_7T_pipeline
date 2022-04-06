@@ -33,6 +33,7 @@ spm('defaults', 'FMRI');
 %% run through runs, print info and run 
 
 for irun = 1:nrun
+
     clear matlabbatch
     
     matlabbatch{1}.spm.tools.physio.save_dir = cellstr(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func')); % 1
