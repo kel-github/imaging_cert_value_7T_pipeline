@@ -172,12 +172,10 @@ write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num){
                   durations=unname(events_4_spm$durations))
   
   if (sub_num < 10){
-    sub_str = "sub-00%d"
-  } else if (sub_num > 9 & sub_num < 100) {
     sub_str = "sub-0%d"
   } else {
     sub_str = "sub-%d"
-  }
+  } 
   
   write_json(jsondata, sprintf(paste(fpath, "/",
                                      sub_str, 
@@ -190,8 +188,6 @@ write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num){
   
   
 }
-
-
 
 get_subs_hands <- function(sub, ses, data_dir, TR){
   # use this function to find which orientation -> response mapping each participant had
