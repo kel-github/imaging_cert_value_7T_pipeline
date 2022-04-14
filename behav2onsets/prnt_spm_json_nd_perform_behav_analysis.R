@@ -10,14 +10,14 @@ library(jsonlite)
 source('events_analysis_functions.R')
 
 # get list of subject numbers who did fmri task
-sub_nums <- t(read.csv('~/Insync/tmp-data/clusters/derivatives/complete-participants.csv', header = FALSE))
+sub_nums <- t(read.csv('/clusterdata/uqkgarn1/scratch/data/complete-participants.csv', header = FALSE))
 # tmp single sub for pilot data
 sub_nums = sub_nums[1]
 session = 2
 nruns = 3
 TR = 1510
 
-data_dir = '~/Insync/tmp-data/full-exp-pilot-raw'
+data_dir = '/clusterdata/uqkgarn1/scratch/data'
 
 # Define function to print onsets
 # --------------------------------------------------------------------

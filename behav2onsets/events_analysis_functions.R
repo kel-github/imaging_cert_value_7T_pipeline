@@ -14,13 +14,16 @@ get_mri_fnames <- function(i, fn, TR, nruns, ses_type, data_path){
   # -- data_path = where is the top level of the data (Assumes BIDS)
   if (i < 10){
     sub_str = "sub-00%d"
+    fol_str = "sub-0%d" # because the data from CAI didn't have the extra zero preprended
   } else if (i > 9 & i < 100) {
     sub_str = "sub-0%d"
+    fol_str = "sub-%d"
   } else {
     sub_str = "sub-%d"
+    fol_str = sub_str
   }
   fn <- paste(sub_str, fn, sep="")
-  get_session_strings <- function(x) dir(sprintf(paste(data_path, sub_str, "ses-02", ses_type, sep = "/"), i), pattern=sprintf(fn, i, TR, x), full.names = TRUE)
+  get_session_strings <- function(x) dir(sprintf(paste(data_path, fol_str, "ses-02", ses_type, sep = "/"), i), pattern=sprintf(fn, i, TR, x), full.names = TRUE)
   do.call(cbind, lapply(1:nruns, get_session_strings))
 }
 
