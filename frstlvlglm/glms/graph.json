@@ -1,0 +1,87 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "0_data-grabber",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber"
+        ],
+        "name": "1_get_TR",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber"
+        ],
+        "name": "2_gunzipmask",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber"
+        ],
+        "name": "3_gunzipfunc",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "3_gunzipfunc"
+        ],
+        "name": "4_smoooooth",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber"
+        ],
+        "name": "5_get_prt_onsets",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber",
+            "5_get_prt_onsets",
+            "4_smoooooth",
+            "1_get_TR"
+        ],
+        "name": "6_modelspec",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "2_gunzipmask",
+            "1_get_TR",
+            "6_modelspec"
+        ],
+        "name": "7_level1design",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "7_level1design"
+        ],
+        "name": "8_estimate",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_data-grabber",
+            "4_smoooooth",
+            "8_estimate"
+        ],
+        "name": "9_sink-stuff",
+        "size": 1
+    }
+]

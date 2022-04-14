@@ -1,0 +1,165 @@
+{
+    "groups": [
+        {
+            "name": "Group_00001",
+            "procs": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ],
+            "total": 10
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 4,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 8,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 5,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 3,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 2,
+            "value": 1
+        },
+        {
+            "source": 3,
+            "target": 4,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 1,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 5,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 4,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 1,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 2,
+            "target": 7,
+            "value": 1
+        },
+        {
+            "source": 1,
+            "target": 7,
+            "value": 1
+        },
+        {
+            "source": 6,
+            "target": 7,
+            "value": 1
+        },
+        {
+            "source": 7,
+            "target": 8,
+            "value": 1
+        }
+    ],
+    "maxN": 10,
+    "nodes": [
+        {
+            "group": 1,
+            "name": "0_data-grabber",
+            "report": "/tmp/tmpovcr3oi_/data-grabber/_report/report.rst",
+            "result": "/tmp/tmpovcr3oi_/data-grabber/result_data-grabber.pklz"
+        },
+        {
+            "group": 1,
+            "name": "1_get_TR",
+            "report": "/tmp/tmpfr3jhwbj/glms/_sub_01/get_TR/_report/report.rst",
+            "result": "/tmp/tmpfr3jhwbj/glms/_sub_01/get_TR/result_get_TR.pklz"
+        },
+        {
+            "group": 1,
+            "name": "2_gunzipmask",
+            "report": "/tmp/tmp6_nv5x3u/glms/_sub_01/gunzipmask/_report/report.rst",
+            "result": "/tmp/tmp6_nv5x3u/glms/_sub_01/gunzipmask/result_gunzipmask.pklz"
+        },
+        {
+            "group": 1,
+            "name": "3_gunzipfunc",
+            "report": "/tmp/tmpns9yjtb8/glms/_sub_01/gunzipfunc/_report/report.rst",
+            "result": "/tmp/tmpns9yjtb8/glms/_sub_01/gunzipfunc/result_gunzipfunc.pklz"
+        },
+        {
+            "group": 1,
+            "name": "4_smoooooth",
+            "report": "/tmp/tmphf27avfk/glms/_sub_01/smoooooth/_report/report.rst",
+            "result": "/tmp/tmphf27avfk/glms/_sub_01/smoooooth/result_smoooooth.pklz"
+        },
+        {
+            "group": 1,
+            "name": "5_get_prt_onsets",
+            "report": "/tmp/tmpnbzk01mx/glms/_sub_01/get_prt_onsets/_report/report.rst",
+            "result": "/tmp/tmpnbzk01mx/glms/_sub_01/get_prt_onsets/result_get_prt_onsets.pklz"
+        },
+        {
+            "group": 1,
+            "name": "6_modelspec",
+            "report": "/tmp/tmpdjteoe4t/glms/_sub_01/modelspec/_report/report.rst",
+            "result": "/tmp/tmpdjteoe4t/glms/_sub_01/modelspec/result_modelspec.pklz"
+        },
+        {
+            "group": 1,
+            "name": "7_level1design",
+            "report": "/tmp/tmpczqyhzqk/glms/_sub_01/level1design/_report/report.rst",
+            "result": "/tmp/tmpczqyhzqk/glms/_sub_01/level1design/result_level1design.pklz"
+        },
+        {
+            "group": 1,
+            "name": "8_estimate",
+            "report": "/tmp/tmp75vkafml/glms/_sub_01/estimate/_report/report.rst",
+            "result": "/tmp/tmp75vkafml/glms/_sub_01/estimate/result_estimate.pklz"
+        },
+        {
+            "group": 1,
+            "name": "9_sink-stuff",
+            "report": "/tmp/tmp8ewd66b6/glms/_sub_01/sink-stuff/_report/report.rst",
+            "result": "/tmp/tmp8ewd66b6/glms/_sub_01/sink-stuff/result_sink-stuff.pklz"
+        }
+    ]
+}
