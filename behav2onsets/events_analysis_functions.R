@@ -131,15 +131,18 @@ match_behaviour_to_event_timings <- function(dat, evs){
   # list of names, onsets and durations of each condition, for use with make_spm_event_files
   sess_data <- inner_join(dat, evs[evs$event == "value cues",], by = "t")
   
+  # remove error trials
+  sess_data <- sess_data %>% filter(resp == 1)
+  
   tgt_locs <- c("left", "right")
-  spatial_cue_types <- unique(sess_data$cert)
+  spatial_cue_types <- levels(sess_data$cert)[levels(sess_data$cert) != ".2"]
   value_cue_types <- unique(sess_data$reward_type)
   
   names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
   names = sort(as.vector(outer(names, value_cue_types, paste, sep = "_")))
   
   nleft <- length(names)/2
-  nspat <- nleft/3
+  nspat <- nleft/length(spatial_cue_types)
   nval <- length(value_cue_types)
   
   sess_data$loc <- as.factor(sess_data$loc)
