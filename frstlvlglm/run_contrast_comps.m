@@ -8,6 +8,11 @@ function run_contrast_comps(sub, fpath)
 % out the lines that check whether a contrast image has previously
 % been written so that all images are written by default
 %
+% NOTE: to run this on inode, make sure you have already previously
+% done the following in terminal:
+% ml matlab
+% ml spm/12
+%
 % -- INPUTS:
 %  ----sub: subject number [string]
 %  ----fpath: filepath to data - e.g. '/scratch/qbi/uqkgarn1/data/derivatives/spm/'
