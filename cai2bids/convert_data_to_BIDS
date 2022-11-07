@@ -22,6 +22,8 @@ logdir=/clusterdata/uqkgarn1/scratch/data/logs/
 # ####################################################################################################
 # #### copy over data from collection to scratch
 # ###################################################################################################
+# NOTE: I NOW DO MANUAL RSYNC FROM DATA.QRISCLOUD.ORG TO DATA/SOURCE/
+# THEREFORE THIS SECTION SHOULD REMAIN COMMENTED
 # subjs=(1)
 # ses=(2)
 
@@ -49,7 +51,7 @@ logdir=/clusterdata/uqkgarn1/scratch/data/logs/
 # # ##################################################################################################
 # # ## Anatomical Organization ####
 # # ##################################################################################################
-subjs=(1)
+subjs=(2)
 ses=(2)
 fname=("*mp2rage_0.75iso_7t_uni-den")
 
@@ -73,8 +75,8 @@ for subj in "${subjs[@]}"; do
     # # convert to nii + BIDS and then remove the images that were extracted
     # extract to the new sub folder that is at the source level give it the basic filename and 
     ./dcm2niix -o ${niidir}sub-0${subj}/ses-0${sess}/anat -f sub-0${subj}_ses-0${sess}_T1w ${niidir}sub-0${subj}/ses-0${sess}/anat
-    rm ${niidir}sub-0${subj}/ses-0${sess}/anat/*/*.ima  # this may not work across subjects beyond #1 as the mp2 rage was received differently
-    rm -r ${niidir}/sub-0${subj}/ses-0${sess}/anat/MP2RAGE_denoised/ 
+    rm ${niidir}sub-0${subj}/ses-0${sess}/anat/*.dcm 
+    #rm -r ${niidir}/sub-0${subj}/ses-0${sess}/anat/MP2RAGE_denoised/ # this may need turning on or off per sub
 
 done
 done
@@ -83,7 +85,7 @@ done
 # #### Functional Organisation ####
 # ####################################################################################################
 
-subjs=(1)
+subjs=(2)
 ses=(2)
 runs=(1 2 3)
 
@@ -112,7 +114,7 @@ for subj in "${subjs[@]}"; do
     done
 done
 
-# # now the physiological data
+# # # now the physiological data
 for subj in "${subjs[@]}"; do
 
     for sess in "${ses[@]}"; do
@@ -133,10 +135,12 @@ for subj in "${subjs[@]}"; do
 done
 
 # # # # ####################################################################################################
-# # # # #### Remove unneeded files ####
+# # # # #### Move data to data/ and remove unneeded files ####
 # # # # ####################################################################################################
 
-# for subj in "${subjs[@]}"; do
+for subj in "${subjs[@]}"; do
 
-#     rm -rv ${niidir}/sub-0${subj}_*       
-# done
+    rm -rv ${niidir}/sub-0${subj}_*       
+done
+
+# NOW MANUALLY MOVE THIS TO data/ 

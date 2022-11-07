@@ -44,7 +44,7 @@ for i = 1:length(fols)
     %% rename physiol files 
     % this section written for expedience over pretty  
     EXTinfo = dir(fullfile(wd, sprintf('sub-%s', sub_str), 'ses-02', 'func', 'Physio*EXT.log'));
-    if ~isempty(EXTinfo.name)
+    if (isfile(fullfile(EXTinfo.folder, EXTinfo.name)))
         movefile(fullfile(EXTinfo.folder, EXTinfo.name), fullfile(EXTinfo.folder, ...
                                                     sprintf('sub-%s_ses-02_cmrr_att_learn_run-%s_EXT.log', sub_str, run_str)));
     else
@@ -52,7 +52,7 @@ for i = 1:length(fols)
     end
            
     Infoinfo = dir(fullfile(wd, sprintf('sub-%s', sub_str), 'ses-02', 'func', 'Physio*Info.log'));
-    if ~isempty(Infoinfo.name)
+    if (isfile(fullfile(Infoinfo.folder, Infoinfo.name))
         movefile(fullfile(Infoinfo.folder, Infoinfo.name), fullfile(Infoinfo.folder, ...
                                                      sprintf('sub-%s_ses-02_cmrr_att_learn_run-%s_Info.log', sub_str, run_str)));
     else
@@ -60,20 +60,13 @@ for i = 1:length(fols)
     end
     
     PULSinfo = dir(fullfile(wd, sprintf('sub-%s', sub_str), 'ses-02', 'func', 'Physio*PULS.log'));
-    if ~isempty(PULSinfo)
-        movefile(fullfile(PULSinfo.folder, PULSinfo.name), fullfile(PULSinfo.folder, ...
+    if (isfi
+    movefile(fullfile(PULSinfo.folder, PULSinfo.name), fullfile(PULSinfo.folder, ...
                                                        sprintf('sub-%s_ses-02_cmrr_att_learn_run-%s_PULS.log', sub_str, run_str)));
-    else
-        warning('sub-%s is missing PULS file for run-%s', sub_str, run_str)
-    end
 
     RESPinfo = dir(fullfile(wd, sprintf('sub-%s', sub_str), 'ses-02', 'func', 'Physio*RESP.log'));
-    if ~isempty(RESPinfo)
-        movefile(fullfile(RESPinfo.folder, RESPinfo.name), fullfile(RESPinfo.folder, ...
+    movefile(fullfile(RESPinfo.folder, RESPinfo.name), fullfile(RESPinfo.folder, ...
                                                        sprintf('sub-%s_ses-02_cmrr_att_learn_run-%s_RESP.log', sub_str, run_str)));
-    else
-        warning('sub-%s is missing RESP file for run-%s', sub_str, run_str);
-    end
     
 %% rename run file while at it
     runinfo = dir(fullfile(wd, sprintf('sub-%s', sub_str), 'ses-02', 'func', sprintf('*run%s.json', run_str)));

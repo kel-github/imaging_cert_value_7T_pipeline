@@ -41,3 +41,5 @@
      ```./run_bids_validator``` (this file can be found in the folder *cluster_scripts*)
     
     - move the resulting job .OU file to BIDSDIR/derivatives/val-logs/sub-NUM/
+
+7. manually copy the new BIDS-ified data back to where the source data came from (but one level up, to mirror the BIDS structure)
