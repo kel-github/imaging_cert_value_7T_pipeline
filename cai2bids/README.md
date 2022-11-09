@@ -13,7 +13,7 @@
     ```./convert_data_to_BIDS```
 
     NOTE: this data does not yet delete the original unformatted data from source, so delete it when you are sure you no longer need it, as having it around will clog things up
-    NOTE: after running this, manually move to the level above
+    NOTE: after running this, manually move the newly organised files to the level above (data/)
     
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
