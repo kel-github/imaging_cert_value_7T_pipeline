@@ -32,7 +32,7 @@
     - run ```./rename2BIDS``` after making sure the filepath is set correctly at the top of the script
 
 
-4. add 'taskName' to the bold json files to make them task compliant by running ```./addtaskname2bids(wd, sub)``` in a new matlab session (depends on *JSONio* being in the same folder)
+4. add 'taskName' to the bold json files to make them task compliant by running ```addtaskname2bids(wd, sub)``` in a new matlab session (depends on *JSONio* being in the same folder)
 5. copy over behavioural data from source, extract and rename event files (function forthcoming)
 
 6. Now run the bids validator to get the log for that subject
