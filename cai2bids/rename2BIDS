@@ -2,6 +2,7 @@
 #!/bin/bash
 #
 ## Written by K. Garner - rename a specific subject's files to be BIDS compliant
+# IF YOU WANT TO RUN A SUBJECT < N10: add 0s after sub-
 
 set -e # this command causes the script to exit on error
 
@@ -15,7 +16,7 @@ datloc=/clusterdata/uqkgarn1/scratch/data/
 ####################################################################################################
 #### Defining sub data
 ####################################################################################################
-subjs=(2)
+subjs=(124 126 128)
 runs=(1 2 3)
 
 ####################################################################################################
@@ -24,12 +25,12 @@ runs=(1 2 3)
 for sub in "${subjs[@]}"; do
     
     for run in "${runs[@]}"; do
-        c_name=$(find ${datloc} -name sub-0${sub}_*_run-0${run}.nii)
-        nu_name=$(printf ${datloc}sub-0${sub}/ses-02/func/sub-0${sub}_ses-02_task-attlearn_run-0${run}_bold.nii)
+        c_name=$(find ${datloc} -name sub-${sub}_*_run-0${run}.nii)
+        nu_name=$(printf ${datloc}sub-${sub}/ses-02/func/sub-${sub}_ses-02_task-attlearn_run-0${run}_bold.nii)
         mv ${c_name} ${nu_name}
 
-        c_name=$(find ${datloc} -name sub-0${sub}_*_run-0${run}.json)
-        nu_name=$(printf ${datloc}sub-0${sub}/ses-02/func/sub-0${sub}_ses-02_task-attlearn_run-0${run}_bold.json)
+        c_name=$(find ${datloc} -name sub-${sub}_*_run-0${run}.json)
+        nu_name=$(printf ${datloc}sub-${sub}/ses-02/func/sub-${sub}_ses-02_task-attlearn_run-0${run}_bold.json)
         mv ${c_name} ${nu_name}
     done
 done

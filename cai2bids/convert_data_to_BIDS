@@ -8,6 +8,7 @@
 # NOTE: some mp2rages were reconstructed. In this case, the original mp2rage is manually moved
 # to a zip folder in the participant's original data folder
 # 2. make sure any duplicate runs are similarly archived
+# 3. IF YOU WANT TO RUN A SUBJECT < N10: add 0s after sub-
 
 set -e # this command causes the script to exit on error
 ####################################################################################################
@@ -51,9 +52,9 @@ logdir=/clusterdata/uqkgarn1/scratch/data/logs/
 # # ##################################################################################################
 # # ## Anatomical Organization ####
 # # ##################################################################################################
-subjs=(2)
+subjs=(124 126 128)
 ses=(2)
-fname=("*mp2rage_0.75iso_7t_uni-den")
+#fname=("*mp2rage_0.75iso_7t_uni-den") pre-upgrade?
 
 for subj in "${subjs[@]}"; do
     
@@ -61,22 +62,23 @@ for subj in "${subjs[@]}"; do
     echo "Processing subject $subj session $sess"
 
     ###Create structure at the same level as the source data
-    mkdir -p ${niidir}sub-0${subj}/ses-0${sess}/anat
+    mkdir -p ${niidir}sub-${subj}/ses-0${sess}/anat # do you need to add a 0 to sub here?
 
     ### extract images of interest
     for z in *mp2rage_*_uni-den.zip; do
+         #0018_mp2rage_*_uni-den.zip
         # get folder name for subjects dcm data
-        dcm_fName=$(find "${niidir}" -name "sub-0${subj}_*") 
+        dcm_fName=$(find "${niidir}" -name "sub-${subj}_*") 
 		echo  "${dcm_fName}"
         # unzip to the subject folder that has been created in source
-        unzip -d "${niidir}sub-0${subj}/ses-0${sess}/anat" "${dcm_fName}/${z}" 
+        unzip -d "${niidir}sub-${subj}/ses-0${sess}/anat" "${dcm_fName}/${z}" 
     done
 
     # # convert to nii + BIDS and then remove the images that were extracted
     # extract to the new sub folder that is at the source level give it the basic filename and 
-    ./dcm2niix -o ${niidir}sub-0${subj}/ses-0${sess}/anat -f sub-0${subj}_ses-0${sess}_T1w ${niidir}sub-0${subj}/ses-0${sess}/anat
-    rm ${niidir}sub-0${subj}/ses-0${sess}/anat/*.dcm 
-    #rm -r ${niidir}/sub-0${subj}/ses-0${sess}/anat/MP2RAGE_denoised/ # this may need turning on or off per sub
+    ./dcm2niix -o ${niidir}sub-${subj}/ses-0${sess}/anat -f sub-${subj}_ses-0${sess}_T1w ${niidir}sub-${subj}/ses-0${sess}/anat
+    rm ${niidir}sub-${subj}/ses-0${sess}/anat/*.dcm 
+    #rm -r ${niidir}/sub-${subj}/ses-0${sess}/anat/MP2RAGE_denoised/ # this may need turning on or off per sub
 
 done
 done
@@ -85,7 +87,6 @@ done
 # #### Functional Organisation ####
 # ####################################################################################################
 
-subjs=(2)
 ses=(2)
 runs=(1 2 3)
 
@@ -93,23 +94,23 @@ for subj in "${subjs[@]}"; do
 
     for sess in "${ses[@]}"; do
 
-        mkdir -p ${niidir}/sub-0${subj}/ses-0${sess}/func
+        mkdir -p ${niidir}/sub-${subj}/ses-0${sess}/func
 
         for run in "${runs[@]}"; do
             
             # get the filename for this run for finding
 			z=$(printf '*cmrr_att_learn_run0%d.zip' "${run}")
-            fname=$(find ${niidir}sub-0${subj}_*/${z})
+            fname=$(find ${niidir}sub-${subj}_*/${z})
             fname=$(printf ${fname})
             echo "print fname ${fname}"
             new_name=$(basename ${fname})
             new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
 
 			#echo "printing new name ${new_name}"
-            unzip "${fname}" -d "${niidir}sub-0${subj}/ses-0${sess}/${new_name}"
-            ./dcm2niix -o ${niidir}sub-0${subj}/ses-0${sess}/func -f sub-0${subj}_ses-0${sess}_%p ${niidir}sub-0${subj}/ses-0${sess}/${new_name}
+            unzip "${fname}" -d "${niidir}sub-${subj}/ses-0${sess}/${new_name}"
+            ./dcm2niix -o ${niidir}sub-${subj}/ses-0${sess}/func -f sub-${subj}_ses-0${sess}_%p ${niidir}sub-${subj}/ses-0${sess}/${new_name}
             # remove the folder
-            rm -r ${niidir}sub-0${subj}/ses-0${sess}/*_cmrr_att_learn_run*
+            rm -r ${niidir}sub-${subj}/ses-0${sess}/*_cmrr_att_learn_run*
         done
     done
 done
@@ -122,13 +123,12 @@ for subj in "${subjs[@]}"; do
         for run in "${runs[@]}"; do
             
 			z=$(printf '*cmrr_att_learn_run0%d_physiolog.zip' "${run}")
-            fname=$(find ${niidir}sub-0${subj}_*/${z})
+            fname=$(find ${niidir}sub-${subj}_*/${z})
             fname=$(printf ${fname})
             new_name=$(basename $fname)
             new_name=$(echo $new_name | rev | cut -f 2- -d '.' | rev)
             echo "$new_name"
-            unzip "${fname}" -d "${niidir}sub-0${subj}/ses-0${sess}/func/${new_name}"
-#			./dcm2niix -o ${niidir}/sub-0${subj}/ses-0${sess}/func -f sub-0${subj}_ses-0${sess}_physiolog_%p ${niidir}/sub-0${subj}/ses-0${sess}/${new_name}
+            unzip "${fname}" -d "${niidir}sub-${subj}/ses-0${sess}/func/${new_name}"
                 
         done
     done
@@ -140,7 +140,7 @@ done
 
 for subj in "${subjs[@]}"; do
 
-    rm -rv ${niidir}/sub-0${subj}_*       
+    rm -rv ${niidir}/sub-${subj}_*       
 done
 
 # NOW MANUALLY MOVE THIS TO data/ 
