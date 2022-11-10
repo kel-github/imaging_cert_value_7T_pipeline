@@ -13,7 +13,7 @@
     ```./convert_data_to_BIDS```
 
     NOTE: this data does not yet delete the original unformatted data from source, so delete it when you are sure you no longer need it, as having it around will clog things up
-    NOTE: after running this, manually move to the level above
+    NOTE: after running this, manually move the newly organised files to the level above (data/)
     
 2. extract phsyiological regressor files (the bids validator will ignore them for now but will use them later)
 
@@ -32,7 +32,7 @@
     - run ```./rename2BIDS``` after making sure the filepath is set correctly at the top of the script
 
 
-4. add 'taskName' to the bold json files to make them task compliant by running ```./addtaskname2bids(wd, sub)``` in a new matlab session (depends on *JSONio* being in the same folder)
+4. add 'taskName' to the bold json files to make them task compliant by running ```addtaskname2bids(wd, sub)``` in a new matlab session (depends on *JSONio* being in the same folder)
 5. copy over behavioural data from source, extract and rename event files (function forthcoming)
 
 6. Now run the bids validator to get the log for that subject
