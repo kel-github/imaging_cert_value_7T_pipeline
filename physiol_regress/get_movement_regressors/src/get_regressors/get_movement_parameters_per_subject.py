@@ -1,7 +1,8 @@
 # get motion regressors into a .txt file for use in PhysIO toolbox
 # functions for getting motion regressors
 ### written by K. Garner, 2022
-
+import json
+import pandas as pd
 
 # %%
 # data_dir = '/clusterdata/uqkgarn1/scratch/data/' (Note: don't use expansion tilde!)

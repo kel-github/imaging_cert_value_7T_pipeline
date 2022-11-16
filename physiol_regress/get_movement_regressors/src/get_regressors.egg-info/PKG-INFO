@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: get-regressors
+Version: 0.0.0
+Summary: Gets motion regressors from frmiprep outputs for use with SPM and other packages
+License: MIT License
+Keywords: regressors
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Get Regressors
+
+This is a simple package that will take fmriprep confounds files, and will
+extract the motion regressors into a .txt file, suitable for use with SPM. <p>
+
+Assumes data is in BIDS v1.0 format <p>
+
+Only extracts motion and first derivative of x,y,z of roll and yaw

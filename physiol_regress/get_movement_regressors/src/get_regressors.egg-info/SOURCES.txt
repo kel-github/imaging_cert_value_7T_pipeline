@@ -1,0 +1,16 @@
+.DS_Store
+LICENSE
+README.md
+example.py
+pyproject.toml
+src/.DS_Store
+src/get_regressors/.DS_Store
+src/get_regressors/__init__.py
+src/get_regressors/console.py
+src/get_regressors/get_movement_parameters_per_subject.py
+src/get_regressors.egg-info/PKG-INFO
+src/get_regressors.egg-info/SOURCES.txt
+src/get_regressors.egg-info/dependency_links.txt
+src/get_regressors.egg-info/entry_points.txt
+src/get_regressors.egg-info/requires.txt
+src/get_regressors.egg-info/top_level.txt

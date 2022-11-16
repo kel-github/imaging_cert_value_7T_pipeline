@@ -1,6 +1,5 @@
-import pandas as pd
-import numpy as np
-import os, re, json
+from .get_movement_parameters_per_subject import list_files, print_motion_regressors_for_spm
+import sys
 
 def convert_motion_to_spm(data_dir, subject_number, session_number, runs, task):
     """Convert fmriprep confounds output to a txt file for use with spm

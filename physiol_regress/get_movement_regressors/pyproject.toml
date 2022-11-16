@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "get-regressors"
+description = "Gets motion regressors from frmiprep outputs for use with SPM and other packages"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["regressors"]
+license = {text = "MIT License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "numpy", "pandas"
+]
+dynamic = ["version"]
+
+[project.scripts]
+get-regressors = "get_regressors.console:main"
+
+[[authors]]
+name = "Kelly Garner"
+email = "getkellygarner@gmail.com"
+
