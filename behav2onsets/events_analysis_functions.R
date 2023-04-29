@@ -94,7 +94,7 @@ get_mri_dat <- function(subject, session, data_path, ses_type, fn, TR, runs, sep
     tmp
   }
   
-  d <- lapply(1:nruns, function (j) resplog(subject, j))
+  d <- lapply(1:runs, function (j) resplog(subject, j))
   d
 }
 

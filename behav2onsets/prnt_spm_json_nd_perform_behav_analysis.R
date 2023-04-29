@@ -10,24 +10,25 @@ library(jsonlite)
 source('events_analysis_functions.R')
 
 # get list of subject numbers who did fmri task
-sub_nums <- t(read.csv('/clusterdata/uqkgarn1/scratch/data/complete-participants.csv', header = FALSE))
-# tmp single sub for pilot data
-sub_nums = sub_nums[1]
+sub_nums <- t(read.csv('/data/VALCERT/derivatives/complete-participants.csv', header = FALSE))
+runs <- c(3, 3) # this needs to be a vector of length sub_nums, with the corresponding number of runs we
+# have for that participant
 session = 2
-nruns = 3
 TR = 1510
+save_alldat_loc <- "" # NOTE - THIS NEEDS TO BE DEFINED - WHERE SHALL WE SAVE THE BEHAV DF?
 
-data_dir = '/clusterdata/uqkgarn1/scratch/data'
+data_dir = '/data/VALCERT/derivatives/fmriprep/'
 
 # Define function to print onsets
 # --------------------------------------------------------------------
-get_spm_onsets_and_data_4_analysis <- function(sub, data_dir, verbose){
+get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
   # for a single subject, get mri behaviour details and save the outputs to
   # a json glm file for use with spm (one json file per run)
   # return a dataframe containing the behavioural data concatenated across
   # the runs for that participant, ready for further analysis
   # Args:
   # -- sub [int]: the subject number to be analysed
+  # -- runN [int]: how many runs do we have for that subject?
   # -- data_dir [str]: where do you want outputs to be saved? e.g. '~/Insync/tmp-data/full-exp-pilot-raw'
   #                      functions assume that this is the top level for where sub-x/ses-x/beh lives
   # -- verbose [TRUE or FALSE]: return plot of subject data?
@@ -36,6 +37,8 @@ get_spm_onsets_and_data_4_analysis <- function(sub, data_dir, verbose){
   # -- dat_4_behav_analysis [dataframe]: dataframe containing the behavioural data
   #                                      for that participant for further analysis
   # -- densities for reward cond x cueing effect, if verbose is TRUE
+  
+  nruns <- runN
   
   fn = "_ses-02_task-learnAtt_acq-TR%d_run-0%d_events.tsv"
   e_nms = get_mri_fnames(sub, fn, TR, nruns, "beh", data_dir) 
@@ -62,13 +65,30 @@ get_spm_onsets_and_data_4_analysis <- function(sub, data_dir, verbose){
 
   # now rbind behavioural data and plot
   dat_4_behav_analysis <- do.call(rbind, all_behav_info)
-  if(verbose) p = dat_4_behav_analysis %>% filter(resp == 1) %>% ggplot(aes(x=rt, group=reward_type, col=reward_type)) + 
-                                                            geom_density(fill="white", alpha = 0.5) + 
+  if(verbose) {p = dat_4_behav_analysis %>% filter(resp == 1) %>% ggplot(aes(x=cert, y=rt, col=reward_type)) + 
+                                                            geom_violin(alpha = 0.5) + 
+                                                            geom_boxplot(width = 0.1) +
                                                             facet_wrap(~reward_type) + 
                                                             ggtitle(paste("sub", dat_4_behav_analysis$sub[1]))
-  list(dat_4_behav_analysis, p)
+    if (sub < 10){
+      sub_str <- sprintf("sub-0%d", sub)
+    } else {
+      sub_str <- sprintf("sub-%d", sub)
+    }
+    ggsave(filename = paste(data_dir, sub_str, "/", "ses-02/", "beh/", sub_str, "_behavsum.pdf", sep=""), 
+                            plot = p, units = "cm", width = 20, height = 20)
+  }
+  list(dat_4_behav_analysis)
 }
 
 # Run function
 # --------------------------------------------------------------------
-get_spm_onsets_and_data_4_analysis(sub_nums[1], data_dir, TRUE)
+dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, 
+                                                                                                verbose = TRUE))
+all_dat <- do.call(rbind, dat) # this concatenates all the participant behavioural data into a dataframe
+save(all_dat, save_alldat_loc)
+
+# function to go through and save each plot for each participant
+
+
+
