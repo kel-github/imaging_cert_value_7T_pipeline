@@ -132,26 +132,31 @@ match_behaviour_to_event_timings <- function(dat, evs){
   sess_data <- inner_join(dat, evs[evs$event == "value cues",], by = "t")
   
   # remove error trials
-  sess_data <- sess_data %>% filter(resp == 1)
+  #sess_data <- sess_data %>% filter(resp == 1)
   
   tgt_locs <- c("left", "right")
-  spatial_cue_types <- levels(sess_data$cert)[levels(sess_data$cert) != ".2"]
+  spatial_cue_types <- levels(sess_data$cert)
   value_cue_types <- unique(sess_data$reward_type)
+  correct <- unique(sess_data$resp)
   
   names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
   names = sort(as.vector(outer(names, value_cue_types, paste, sep = "_")))
+  names = sort(as.vector(outer(names, correct, paste, sep =  "_")))
   
-  nleft <- length(names)/2
-  nspat <- nleft/length(spatial_cue_types)
-  nval <- length(value_cue_types)
+  # nleft <- length(names)/2
+  # nspat <- nleft/length(spatial_cue_types)
+  # nval <- length(value_cue_types)
+  # ncor <- length(correct)
   
   sess_data$loc <- as.factor(sess_data$loc)
   levels(sess_data$loc) <- c("left", "right")
+  names <- names[names != "left_.5_ltgt/ldst_1"]
   
-  onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z],
+  onsets <- mapply(function(x, y, z, i) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z & sess_data$resp == i],
                                       x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,],
                                       y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,],
                                       z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,],
+                                      i = as.numeric(sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[4,]),
                    SIMPLIFY = FALSE)
   durations <- lapply(onsets, function(x) rep(0, length(x)))
   out <- list(names, onsets, durations)

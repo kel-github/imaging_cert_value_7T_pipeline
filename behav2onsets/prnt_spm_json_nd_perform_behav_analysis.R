@@ -11,6 +11,7 @@ source('events_analysis_functions.R')
 
 # get list of subject numbers who did fmri task
 sub_nums <- t(read.csv('/data/VALCERT/derivatives/complete-participants.csv', header = FALSE))
+sub_nums <- sub_nums[c(1:2)]
 runs <- c(3, 3) # this needs to be a vector of length sub_nums, with the corresponding number of runs we
 # have for that participant
 session = 2
