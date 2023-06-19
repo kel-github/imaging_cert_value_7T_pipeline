@@ -150,7 +150,7 @@ match_behaviour_to_event_timings <- function(dat, evs){
   
   sess_data$loc <- as.factor(sess_data$loc)
   levels(sess_data$loc) <- c("left", "right")
-  names <- names[names != "left_.5_ltgt/ldst_1"]
+ # names <- names[names != "left_.5_ltgt/ldst_1"]
   
   onsets <- mapply(function(x, y, z, i) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z & sess_data$resp == i],
                                       x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,],
