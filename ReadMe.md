@@ -2,8 +2,8 @@
 
 ### Assessing the influence of the striatum on visual selection
 
-K. Garner CC BY-NC
-W. P. Boyce
+K. Garner CC BY-NC  
+W. P. Boyce  
 
 This repo contains the code used for the analysis pipeline for the 7T MRI project that assesses information in striatal functional data when spatial expectations and incentive values influence visual priorities.  
 
