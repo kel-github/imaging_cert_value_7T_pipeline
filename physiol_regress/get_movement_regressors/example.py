@@ -3,7 +3,8 @@
 
 # %%
 # first define settings for list files
-data_dir = '/Users/kels/Insync/tmp-data/phys_regress/' 
+'''data_dir = '/Users/kels/Insync/tmp-data/phys_regress/' '''
+data_dir = '/data/VALCERT/derivatives/fmriprep/sub-01/ses-02/func'
 subject_number = ['01']
 session_number = ['02'] # this assumes data is in BIDS
 runs = pd.Series(str(x) for x in [1, 2, 3])
