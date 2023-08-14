@@ -3,6 +3,9 @@
 
 # %%
 # first define settings for list files
+
+import get_movement_parameters_per_subject.py
+
 '''data_dir = '/Users/kels/Insync/tmp-data/phys_regress/' '''
 data_dir = '/data/VALCERT/derivatives/fmriprep/sub-01/ses-02/func'
 subject_number = ['01']

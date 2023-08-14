@@ -1,8 +1,13 @@
 # get motion regressors into a .txt file for use in PhysIO toolbox
 # functions for getting motion regressors
 ### written by K. Garner, 2022  
+
 import json
 import pandas as pd
+
+import os
+import re
+#import glob
 
 # %%
 # data_dir = '/clusterdata/uqkgarn1/scratch/data/' (Note: don't use expansion tilde!)
@@ -12,6 +17,8 @@ import pandas as pd
 # task = 'attlearn' (string, name of task for BIDS)
 
 def list_files(data_dir, subject_number, session_number, runs, task):
+
+
     """create a list of regressor filenames for given subject
     Dependencies: assumes data is in BIDS format
 
@@ -25,8 +32,90 @@ def list_files(data_dir, subject_number, session_number, runs, task):
     Returns:
         regressor_files (list of strings): a cell/list of len(run) containing the regressor filenames for that participant
     """
-    tmplt = ''.join([data_dir, 'sub-{0}/ses-{1}/func/sub-{0}_ses-{1}_task-{2}_run-{3}_desc-confounds_timeseries.tsv'])
-    return [tmplt.format(sub, sess, t, run) for sub in subject_number for sess in session_number for t in task for run in runs]
+
+    # regex code that accounts for string sub- with either n or no leadings zeros
+    # and we place the current sub number where the {} are (stripping any leading zeroes from it
+    # in order to simplify the code).
+    sub_pattern = re.compile(r'\bsub-0*{}(?:\b|$)'.format(re.escape(subject_number[0].lstrip('0'))))
+      
+    matching_subs = [folder for folder in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, folder)) and sub_pattern.search(folder)]
+
+    # print("matching_subs: ")
+    # print(matching_subs)
+
+    # regex code that accounts for string ses- with either n or no leadings zeros
+    # and we place the current sess number where the {} are (stripping any leading zeroes from it
+    # in order to simplify the code).
+    sess_pattern = re.compile(r'\bses-0*{}(?:\b|$)'.format(re.escape(session_number[0].lstrip('0'))))
+    
+    # print("sess_pattern")
+    # print(sess_pattern)
+
+    ses_dir = str(data_dir+matching_subs[0])
+
+    # print("ses_dir")
+    # print(ses_dir)
+
+    # Search for matching folders using the regex pattern in sess_pattern
+    matching_sess = [folder for folder in os.listdir(ses_dir) if os.path.isdir(os.path.join(ses_dir, folder)) and sess_pattern.match(folder)]
+
+
+
+    # Create empty list to store filenames
+    regressor_files = []
+
+    # iterate through each run added to the run list in the execution script
+    for run in runs:
+
+        
+        run = str(run)
+        # print("CONTENTS of run: ")
+        # print(run)
+
+        # regex code the accounts for string run- with either n or no leadings zeros
+        # and we place the current run number where the {} are (stripping any leading zeroes from it
+        # in order to simplify the code).
+        run_pattern = re.compile(r'run-0*{}'.format(re.escape(run.lstrip('0'))))
+
+        # print("run_pattern contents: ")
+        # print(run_pattern)
+
+        # Search for the matching run in the current session folder
+        matching_run = next((r.group() for r in map(run_pattern.search, os.listdir(os.path.join(data_dir, matching_subs[0], matching_sess[0], 'func'))) if r), None)
+
+        print("matching_run contents: ")
+        print(matching_run)
+
+        # If a matching run-n is found, construct the filename and append to list
+        if matching_run:
+            # join all the elements to build the targeted filename
+            filename = os.path.join(data_dir, '{}/{}/func/{}_{}_task-{}_{}_desc-confounds_timeseries.tsv'.format(matching_subs[0], matching_sess[0], matching_subs[0], matching_sess[0], task[0], matching_run))
+            regressor_files.append(filename)
+        else:
+
+            print("No match for pattern: ")
+            print(run_pattern)
+            print("For subject: ")
+            print(matching_subs[0])
+
+    print("regssor_files contents")
+    print(regressor_files)
+
+    # Return the list of filenames
+    return regressor_files
+  
+    # #tmplt = ''.join([data_dir, sub_str_match+'/ses-{1}/func/'+sub_str_match+'_ses-{1}_task-{2}_run-{3}_desc-confounds_timeseries.tsv'])
+    
+    # #tmplt = ''.join([data_dir, sub_str_match+'/'+ses_str_match+'/func/'+sub_str_match+'_'+ses_str_match+'_task-{2}_'+run_str_match+'_desc-confounds_timeseries.tsv'])
+    
+    # tmplt = ''.join([data_dir, sub_pattern+'/'+ses_pattern+'/func/'+sub_pattern+'_'+ses_pattern+'_task-{2}_'+run_pattern+'_desc-confounds_timeseries.tsv'])
+    
+
+    # #print("GETTING HERE")
+    # #print(tmplt)
+
+    # return [tmplt.format(sub, sess, t, run) for sub in subject_number for sess in session_number for t in task for run in runs]
+
 
 
 def print_new_json(fname, data): # function to print json file, given fname (str) and data = {}
