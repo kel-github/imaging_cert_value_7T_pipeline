@@ -142,12 +142,20 @@ def print_motion_regressors_for_spm(confounds_fname):
         regressor_file_name (string): name of the motion regressor file that was printed by the function
         also prints a json sidecar file for each regressor txt file, not listed in return
     """
-    data = pd.read_csv(confounds_fname, sep='\t', usecols=['trans_x', 'trans_x_derivative1',
+    '''data = pd.read_csv(confounds_fname, sep='\t', usecols=['trans_x', 'trans_x_derivative1',
                                                  'trans_y', 'trans_y_derivative1',
                                                  'trans_z', 'trans_z_derivative1',
                                                  'rot_x', 'rot_x_derivative1',
                                                  'rot_y', 'rot_y_derivative1',
-                                                 'rot_z', 'rot_z_derivative1'])
+                                                 'rot_z', 'rot_z_derivative1'])'''
+    
+    data = pd.read_csv(confounds_fname, sep='\t', usecols=['trans_x',
+                                                'trans_y',
+                                                'trans_z',
+                                                'rot_x',
+                                                'rot_y',
+                                                'rot_z',])
+
     data = data.fillna(value=0) # for SPM
     
     savefname = confounds_fname.replace('confounds', 'motion')
@@ -155,14 +163,24 @@ def print_motion_regressors_for_spm(confounds_fname):
     data.to_csv(savefname, sep=' ', index=False, header=False)
     # write json file to accompany
     motionfname_json = savefname.replace('txt', 'json')
-    motion_json_data = {"tsvType":"spm motion", 
+    '''motion_json_data = {"tsvType":"spm motion", 
                         "params":['trans_x', 'trans_x_derivative1',
                                   'trans_y', 'trans_y_derivative1',
                                   'trans_z', 'trans_z_derivative1',
                                   'rot_x', 'rot_x_derivative1',
                                   'rot_y', 'rot_y_derivative1',
                                   'rot_z', 'rot_z_derivative1'],
-                        "source":savefname}
+                        "source":savefname}'''
+    
+    motion_json_data = {"tsvType":"spm motion", 
+                "params":['trans_x',
+                            'trans_y',
+                            'trans_z',
+                            'rot_x',
+                            'rot_y',
+                            'rot_z',],
+                "source":savefname}
+
     print_new_json(motionfname_json, motion_json_data)
     return savefname
 
