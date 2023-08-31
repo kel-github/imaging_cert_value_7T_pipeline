@@ -9,7 +9,7 @@
 % before running spm jobman
 % assumes data is in BIDS format
 
-
+% ope
 
 clear all
 
@@ -17,7 +17,7 @@ figure_control_switch = 0;
 %figure_control_switch = 1;
 
 % define subject strings here
-sub_list = {'137'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+sub_list = {'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
 % to see subs that don't run go to: https://docs.google.com/spreadsheets/d/1Qn6wB7nNfiiPS34IYNtGHWTbe3mS12T34Ka6vbPqmUI/edit#gid=632063575
 
 for i = 1:numel(sub_list)
@@ -80,17 +80,18 @@ for i = 1:numel(sub_list)
         matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motion-physregress_timeseries.txt', sub, task, irun);
         matlabbatch{1}.spm.tools.physio.model.output_physio = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio', sub, task, irun); % 7
         matlabbatch{1}.spm.tools.physio.model.orthogonalise = 'none';
-        matlabbatch{1}.spm.tools.physio.model.censor_unreliable_recording_intervals = true; %false;
+        matlabbatch{1}.spm.tools.physio.model.censor_unreliable_recording_intervals = false; %true;
         matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.c = 3;
         matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.r = 4;
         matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.cr = 1;
         matlabbatch{1}.spm.tools.physio.model.rvt.no = struct([]);
         matlabbatch{1}.spm.tools.physio.model.hrv.no = struct([]);
         matlabbatch{1}.spm.tools.physio.model.noise_rois.no = struct([]);
+        %matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = {fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motion_timeseries.txt', sub, task, irun))}; %8
         matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = {fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motion_timeseries.txt', sub, task, irun))}; %8
-        matlabbatch{1}.spm.tools.physio.model.movement.yes.order = 6;
+        matlabbatch{1}.spm.tools.physio.model.movement.yes.order = 12; % then run with 12
         matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_method = 'FD';
-        matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.5;
+        matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.2;
         matlabbatch{1}.spm.tools.physio.model.other.no = struct([]);
         matlabbatch{1}.spm.tools.physio.verbose.level = 1;
         matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio-fig', sub, task, irun);
