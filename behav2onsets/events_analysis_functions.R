@@ -142,10 +142,9 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   #sess_data <- sess_data %>% filter(resp == 1)
   
   tgt_locs <- c("left", "right")
-  spatial_cue_types <- levels(sess_data$cert)
+  spatial_cue_types <- c(".5", ".8") 
   value_cue_types <- unique(sess_data$reward_type)
-  correct <- unique(sess_data$resp)
-  
+
   # need to add a column here if motor argument == TRUE
   # thing is, names would be just replaced with the response hand
 
@@ -155,8 +154,6 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   
     names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
     names = sort(as.vector(outer(names, value_cue_types, paste, sep = "_")))
-    names = sort(as.vector(outer(names, correct, paste, sep =  "_")))
-  
   }
   
   if (motor_sanity == TRUE){
@@ -184,17 +181,16 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
       names[names == '0_1'] <- paste0('0_1_', output_resp_map[1] , "_", output_resp_map[3])
       names[names == '1_0'] <- paste0('1_0_', output_resp_map[1] , "_", output_resp_map[3])
       names[names == '1_1'] <- paste0('1_1_', output_resp_map[2] , "_", output_resp_map[3])
-    # format: ccw, accuracy, response hand, resp_order code
+    # format: accuracy, ccw, response hand, resp_order code - 
 
     
   } # end of motor_sanity == TRUE if statement
   
   #print(paste0("THIS IS WHAT names length LOOKS LIKE: ", length(names)))
   
-  sess_data$loc <- as.factor(sess_data$loc)
+  sess_data$loc <- as.factor(sess_data$loc) # where the tgt appeared
   levels(sess_data$loc) <- c("left", "right")
 
-  
   # values assigned to SPM json files if extracting motor response info
   if (motor_sanity == TRUE){
     
@@ -212,11 +208,10 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   # values assigned to SPM json files if extracting experimental data
   if (motor_sanity == FALSE){
     
-    onsets <- mapply(function(x, y, z, i) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z & sess_data$resp == i],
-                                        x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,],
-                                        y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,],
-                                        z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,],
-                                        i = as.numeric(sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[4,]),
+    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z & sess_data$resp == i],
+                                        x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
+                                        y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
+                                        z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
                      SIMPLIFY = FALSE)
     durations <- lapply(onsets, function(x) rep(0, length(x)))
   
@@ -292,13 +287,13 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
    
   # following code checks the resp_order key and assigns the key mapping accordingly to descriptive variables
   if (json_files$resp_order == 1) {
-    clockwise = "f"
-    anticlockwise =  "j"
+    clockwise = "f" # RH clockwise
+    anticlockwise =  "j" # LH anti-clockwise
   }
   
   if (json_files$resp_order == 2){
-    clockwise = "j"
-    anticlockwise = "f"
+    clockwise = "j" # LH clockwise
+    anticlockwise = "f" # RH anticlockwise
   }
   
   # crate string with format that will match json_files$resp_key[1]
@@ -320,7 +315,7 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
   # to make a given response
   if (clockwise == "f"){
     
-    clockwise_SPM = "leftH"
+    clockwise_SPM = "leftH" ## THESE NEED TO BE SWITCHED AROUND
     anticlockwise_SPM = "rightH"
     
     # print(paste0("GETS INSIDE cw == f ASSIGNMENT, clockwise= :, ", clockwise))
@@ -347,54 +342,6 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
   #print(paste0("HERE IS CONTENTS OF resp_list: ", resp_list))
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity = FALSE){

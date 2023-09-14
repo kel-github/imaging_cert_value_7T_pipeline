@@ -14,15 +14,16 @@ source('events_analysis_functions.R')
 # SPM control panel -> uncomment which version to create
 
 # create motor sanity check SPM files
-motor_sanity_on = TRUE
+#motor_sanity_on = TRUE
 
 # create experiment SPM files
-#motor_sanity_on = FALSE
+motor_sanity_on = FALSE
 
 ################################################################################
 
 # get list of subject numbers who did fmri task
 sub_nums <- t(read.csv('/data/VALCERT/derivatives/complete-participants.csv', header = FALSE))
+sub_nums <- sub_nums[1]
 runs <- rep(3, length(sub_nums)) # this needs to be a vector of length sub_nums, with the corresponding number of runs we
 runs[which(sub_nums == 137)] <- 2
 # have for that participant
@@ -48,7 +49,7 @@ data_dir = '/data/VALCERT/derivatives/fmriprep/'
 
 count = 0
 
-Old.Man.Global = ""
+Old.Man.Global = "" # what's this variable?
 
 # Define function to print onsets
 # --------------------------------------------------------------------
@@ -134,32 +135,6 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
   
   # now write to json files
   lapply(1:length(events_4_spm), function(x) write_json_4_spm(events_4_spm[[x]], fpath=data_dir, sub, x, motor_sanity = motor_sanity_on))
-  
-  #source('updated_210623_events_analysis_functions.R')
-  
-  # for(i in 1:length(sub_nums)){
-  #   
-  #   resp_map_counter(sub=sub(".*fmriprep/", "", sub_folders[i]),session,sub_folders)
-  #   
-  # }
-  
-  # sub is populated by the list sub_nums -> probably need to do a for loop here...?
-  # doesn't seem to be the issue... it's iterating around lots of times...
-  # probably 93 times, find that number...
-
-  #count = count + 1
-  
-  #print(paste0("count  = ", count))
-  
-  #e_mot = resp_map_counter(sub, session, sub_folders)
-  
-  #rownames(e_mot) <- sub # building row names based on sub
-  #colnames(e_mot) <- 1:nruns # building column names on numbers
-  
-  #Old.Man.Global <<- e_mot
-    
-  # sub(".*fmriprep/", "", string)
- # lapply(sub,for(i in 1:length(sub_nums)){sub(".*fmriprep/", "", sub_folders[i])})
   
   # now rbind behavioural data and plot
   dat_4_behav_analysis <- do.call(rbind, all_behav_info)
