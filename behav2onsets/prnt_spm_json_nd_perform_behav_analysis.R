@@ -14,10 +14,10 @@ source('events_analysis_functions.R')
 # SPM control panel -> uncomment which version to create
 
 # create motor sanity check SPM files
-motor_sanity_on = TRUE
+#motor_sanity_on = TRUE
 
 # create experiment SPM files
-#motor_sanity_on = FALSE
+motor_sanity_on = FALSE
 
 ################################################################################
 
@@ -152,7 +152,7 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
 
 # Run function
 # --------------------------------------------------------------------
-dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, verbose = TRUE))
+dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, verbose = FALSE))
 
 # there should 3 trials missing in one file??
 # subject number

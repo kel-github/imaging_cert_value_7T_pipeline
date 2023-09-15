@@ -149,8 +149,19 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   
   tgt_locs <- c("left", "right")
   spatial_cue_types <- c(".5", ".8") 
-  value_cue_types <- unique(sess_data$reward_type)
+  # making a variable that will tell me which value 
+  # was on the left and which was on the right
+  sess_data$left_col <- as.factor(sess_data$left_col)
+  levels(sess_data$left_col) <- c("l", "h")
+  sess_data$right_col <- as.factor(sess_data$right_col)
+  levels(sess_data$right_col) <- c("l", "h")
+  sess_data <- sess_data %>% mutate(val_config = paste(left_col, right_col, sep=""))
+  value_cue_types <- unique(sess_data$val_config)
 
+  # this will allow us to pull out correct tgt locations from the data - i.e. the 
+  # entries match 'tgt_locs'
+  sess_data$loc <- as.factor(sess_data$loc) # where the tgt appeared
+  levels(sess_data$loc) <- c("left", "right")
   # need to add a column here if motor argument == TRUE
   # thing is, names would be just replaced with the response hand
 
@@ -196,9 +207,7 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   } # end of motor_sanity == TRUE if statement
   
   #print(paste0("THIS IS WHAT names length LOOKS LIKE: ", length(names)))
-  
-  sess_data$loc <- as.factor(sess_data$loc) # where the tgt appeared
-  levels(sess_data$loc) <- c("left", "right")
+
 
   # values assigned to SPM json files if extracting motor response info
   if (motor_sanity == TRUE){
@@ -217,7 +226,7 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   # values assigned to SPM json files if extracting experimental data
   if (motor_sanity == FALSE){
     
-    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z],
+    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$val_config == z],
                                         x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
                                         y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
                                         z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
