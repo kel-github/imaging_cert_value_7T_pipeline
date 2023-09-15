@@ -25,8 +25,7 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
     %end
     
     % Iterate over each subfolder
-    for FolderIdx 
-        = 1:numel(subFolders)
+    for FolderIdx = 1:numel(subFolders)
         % append the sub number to build sub-n folder path
         subFolderPath = fullfile(rootPath, subFolders(FolderIdx).name);
         

@@ -132,6 +132,12 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   # -- dat [dataframe] produced using a combination of get_mri_dat (on task and behav data)
   #                    and 'allocate_conditions_on_d'
   # -- evs [dataframe] event timings from the run matching dat, acquired using 'get_event_times_data'
+  # -- motor_sanity [TRUE/FALSE] when TRUE, pulls data for motor response left hand vs right hand; when FALSE pulls data for task
+  # -- sub [dataframe] subject numbers pulled from csv file
+  # -- sess [integer] session number of interest
+  # -- run [integer] hardcoded as '1' given response mapping is the same for a given participant across n runs
+  # -- sub_folders [string] data directory path
+  # -- namePatt [string] file name pattern
   # Returns:
   # list of names, onsets and durations of each condition, for use with make_spm_event_files
   sess_data <- inner_join(dat, evs[evs$event == "value cues",], by = "t")
@@ -162,11 +168,13 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
     # call function to return hand response information
     output_resp_map<-resp_map_LvsR(sub, sess, run, sub_folders, namePatt)
       
-   
     ccw <- unique(sess_data$ccw)
     acc <- unique(sess_data$resp)
     
     names = sort(as.vector(outer(ccw, acc, paste, sep="_")))
+
+    # filter so that only correct responses captured
+    names <- names[names != '0_0' & names != '1_0']
     
     ###########################################################################
     # NOTE: 
@@ -175,11 +183,12 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
     # output_resp_map[3] == json_files$resp_order (response_order key number)
     ###########################################################################
     
+    # change below to only capture correct responses...
     # if ccw_acc pattern x is in names then take that pattern and paste hand used and resp_order into its position in names
     # format: ccw, accuracy, response hand, resp_order code
-      names[names == '0_0'] <- paste0('0_0_', output_resp_map[2] , "_", output_resp_map[3])
+      #names[names == '0_0'] <- paste0('0_0_', output_resp_map[2] , "_", output_resp_map[3]) # remove
       names[names == '0_1'] <- paste0('0_1_', output_resp_map[1] , "_", output_resp_map[3])
-      names[names == '1_0'] <- paste0('1_0_', output_resp_map[1] , "_", output_resp_map[3])
+      #names[names == '1_0'] <- paste0('1_0_', output_resp_map[1] , "_", output_resp_map[3]) # remove
       names[names == '1_1'] <- paste0('1_1_', output_resp_map[2] , "_", output_resp_map[3])
     # format: accuracy, ccw, response hand, resp_order code - 
 
@@ -203,19 +212,19 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
                      SIMPLIFY = FALSE)
     durations <- lapply(onsets, function(x) rep(0, length(x)))
     
-  } # end of if statement
+  } # end of if motor_sanity == TRUE statement
   
   # values assigned to SPM json files if extracting experimental data
   if (motor_sanity == FALSE){
     
-    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z & sess_data$resp == i],
+    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$reward_type == z],
                                         x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
                                         y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
                                         z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
                      SIMPLIFY = FALSE)
     durations <- lapply(onsets, function(x) rep(0, length(x)))
   
-  } # end of if statement
+  } # end of if motor_sanity == FALSE statement
   
     out <- list(names, onsets, durations)
     names(out) <- c("names", "onsets", "durations")
@@ -227,12 +236,15 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
 # arguments and the defined pattern
 json_file_list <- function(sub, sess, run, subs_data_path, namePatt){ 
   
-  # This function reads the bold run file specifically specified
-  # and returns the data - we can do this because the response mapping
-  # didn't change once assigned to a given participant
-  
-  # subs_data_path now only have the path to where the sub folder are
-  # search folders for subject match; return path up to subject number
+  # This function reads the bold run file specified.
+  # Args:
+  # -- sub [dataframe] subject numbers pulled from csv file
+  # -- sess [integer] session number of interest
+  # -- run [integer] hardcoded as '1' given response mapping is the same for a given participant across n runs
+  # -- subs_data_path [string] data directory path
+  # -- namePatt [string] file name pattern
+  # Returns:
+  # contents of json file
   
   # Regular expression pattern for sub/sess/run -> accounts for possible leading zeros
   sub_pattern <- sprintf("sub-0*%d", sub)
@@ -279,6 +291,16 @@ json_file_list <- function(sub, sess, run, subs_data_path, namePatt){
 # prnt_json_nd_perform_behav_analysis.
 resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
   
+  
+  # Args:
+  # -- sub [dataframe] subject numbers pulled from csv file
+  # -- sess [integer] session number of interest
+  # -- run [integer] hardcoded as '1' given response mapping is the same for a given participant across n runs
+  # -- data_dir [string] data directory path
+  # -- namePatt [string] file name pattern
+  # Returns:
+  # list of response mapping: [1]=clockwise, [2]=anticlockwise
+  
   # call the function json_file_list which finds the file matching
   # sub, sess, run and data_dir via the file name pattern defined inside
   # json_file_list - it reads and returns the json contents
@@ -315,8 +337,8 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
   # to make a given response
   if (clockwise == "f"){
     
-    clockwise_SPM = "leftH" ## THESE NEED TO BE SWITCHED AROUND
-    anticlockwise_SPM = "rightH"
+    clockwise_SPM = "rightH"
+    anticlockwise_SPM = "leftH"
     
     # print(paste0("GETS INSIDE cw == f ASSIGNMENT, clockwise= :, ", clockwise))
     
@@ -324,8 +346,8 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
   
   if (clockwise == "j"){
     
-    clockwise_SPM = "rightH"
-    anticlockwise_SPM = "leftH"
+    clockwise_SPM = "leftH"
+    anticlockwise_SPM = "rightH"
     
     # print(paste0("GETS INSIDE cw == j ASSIGNMENT, clockwise= :, ", clockwise))
     
@@ -373,7 +395,7 @@ write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity
   
   if (motor_sanity==TRUE){
     
-    filenameMain <- '_ses-02_MOTOR_run-%d_desc-SPM-onsets.json'
+    filenameMain <- '_ses-02_task-MOTOR_run-%d_desc-glm-onsets.json'
     
   }
   
