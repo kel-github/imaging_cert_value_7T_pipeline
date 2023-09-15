@@ -14,16 +14,16 @@ source('events_analysis_functions.R')
 # SPM control panel -> uncomment which version to create
 
 # create motor sanity check SPM files
-#motor_sanity_on = TRUE
+motor_sanity_on = TRUE
 
 # create experiment SPM files
-motor_sanity_on = FALSE
+#motor_sanity_on = FALSE
 
 ################################################################################
 
 # get list of subject numbers who did fmri task
 sub_nums <- t(read.csv('/data/VALCERT/derivatives/complete-participants.csv', header = FALSE))
-sub_nums <- sub_nums[1]
+#sub_nums <- sub_nums[1]
 runs <- rep(3, length(sub_nums)) # this needs to be a vector of length sub_nums, with the corresponding number of runs we
 runs[which(sub_nums == 137)] <- 2
 # have for that participant
@@ -48,8 +48,6 @@ data_dir = '/data/VALCERT/derivatives/fmriprep/'
 #resp_map_counter(1,2,data_dir)
 
 count = 0
-
-Old.Man.Global = "" # what's this variable?
 
 # Define function to print onsets
 # --------------------------------------------------------------------
@@ -86,9 +84,7 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
   #print(paste("CHECK values 1:nruns  = ", 1:nruns))
   
   #print(paste0("CONTENTS e_nms = ", e_nms))
-  
-  #Old.Man.Global <<- e_nms
-  
+ 
   #print("stop here")
   
   # now get event details per run returned as a list

@@ -5,7 +5,7 @@
 %-----------------------------------------------------------------------
 % Defining spm batch for defining 1st level GLM
 
-% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/run_frst_lvl_glm.m
+% run_spm12.sh /opt/mcr/v97/ /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/runfrst_lvl_glm.m
 
 %addpath '/home/jovyan/PaulsStuff/spm12'
 
@@ -165,13 +165,8 @@ matlabbatch{1}.spm.stats.fmri_spec.cvi = 'FAST'; % correct for serial correlatio
 if sanity_switch == 0 % run task code
 % 
 %     % will specify own contrasts
-
-% matlabbatch{1}.spm.stats.fmri_spec.fact(1).name = 'target_location';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(1).levels = 2;
-% matlabbatch{1}.spm.stats.fmri_spec.fact(2).name = 'spatial_cue';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(2).levels = 2;
-% matlabbatch{1}.spm.stats.fmri_spec.fact(3).name = 'value_cue';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(3).levels = 4;
+%     matlabbatch{1}.spm.stats.fmri_spec.fact.name = 'task';
+%     matlabbatch{1}.spm.stats.fmri_spec.fact.levels = 16;
     
     disp("task name and factors placeholder...")
 
