@@ -9,19 +9,54 @@
 
 %addpath '/home/jovyan/PaulsStuff/spm12'
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% subs' runs that exceed framerate displacement 60% or >
+%
+
+% part_num	run	perc
+
+% 22	    1	66.6023166023166
+% 22	    2	71.2355212355212
+% 22	    3	65.6370656370656
+
+% 84	    2	63.1274131274131
+
+% 92	    2	63.4989200863931
+% 92	    3	68.9189189189189
+
+% 139	    1	60.8108108108108
+% 139	    2	64.0926640926641
+
+% 140	    1	64.8648648648649
+% 140	    2	72.5868725868726
+% 140	    3	69.1119691119691
+
+
 %% define variables that are looped over, or stay the
 % identifying
-%subs = {'01'}%{'01','02','04','06','08','17','20','22','24','25','75','76','78','79','80','84','92','124','126','128','129','130','132','133','134','135','139','140','152','151'}
-%sub00 = {'001'}%{'001','002','004','006','008','017','020','022','024','025','075','076','078','079','080','084','092','124','126','128','129','130','132','133','134','135','139','140','152','151'}
 
-%subs = {'01','02','04','06','08','17','20','22','24','25','75','76','78','79','80','84','92','124','126','128','129','130','132','133','134','135','139','140','152','151'};
-%subfol00 = {'001','002','004','006','008','017','020','022','024','025','075','076','078','079','080','084','092','124','126','128','129','130','132','133','134','135','139','140','152','151'}; 
+% subs = {'02','137','140'} % don't have physio timeseries files
+
+% exclude the following subs entirely as we need all 3 runs for this step:
+% 22, 84, 92, 137, 139, 140
+
+% run sub 2 using motor file
+
+subs = {'01','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+subfol00 = {'001','004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+
+
+mot_phy_switch = 1; % default 1 means it will look for the merged file
+% mot_phy_switch = 0; % 0 means it will look for the motion only file
+% subs = {'02'}
+% subfol00 = {'002'}
 
 % sanity_switch = 0; % run task code
 sanity_switch = 1; % run motor/hand sanity check code
 
-subs = {'01'};
-subfol00 = {'001'};
 runs = [1, 2, 3];
 nrun = length(runs);
 sess = 2; % 2, or 3
@@ -51,7 +86,7 @@ spm_fol = 'SPM'; % this GLM
 % filter for scans - this is smoothed files pattern
 file_filt = 'ssub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
 %'^swraf.*\.nii$'
-
+%irun
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % define and run first level glms
@@ -64,6 +99,9 @@ for subj = 1:length(subs)
     clear matlabbatch
   %% defining inputs for one subject
     this_sub = subs{subj}; % get this subject number
+        
+    fprintf("Current subject: %s", this_sub)
+    fprintf("\n")
 
     % builds pathname for SPM.mat output file
     spm_fol_full = fullfile(spm_mat_file_dir, sprintf(sub_fol, subfol00{subj}), ...
@@ -138,10 +176,27 @@ for irun = 1:nrun
     % NOTE THAT THE REGRESSORS HAVE TO BE IN THE FOLDER WHERE THE SPM IS
     % SAVED
     %matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
-    %                                                                this_sub, irun);
-    matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
-                                                                         sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
-                                                                         this_sub, irun)));
+    %                                                               this_sub, irun);
+
+    
+    % if merged file available
+    if mot_phy_switch == 1
+
+        matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
+                                                                             sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
+                                                                             this_sub, irun)));
+
+    end % of merged switch
+
+    % if only motion file available
+    if mot_phy_switch == 0
+
+        matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
+                                                                             sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt',...
+                                                                             this_sub, irun)));
+                                                                                      % sub-02_ses-02_task-attlearn_run-3_desc-motion_timeseries
+
+    end % of movement switch
 
 
     % high pass filter - default value

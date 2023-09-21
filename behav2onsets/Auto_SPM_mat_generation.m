@@ -1,11 +1,52 @@
 function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
     
-    % consider adding parameter for filename output change
-
-    %rootPath = 'C:\Users\cratl\Dropbox\UNSW_Work\Research_Officer_Post\GLM_Scripts\data\VALCERT\fmriprep';
-
-    % ADD SOME SANITY CHECKS AND REPORTS
     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % for debugging
+    %
+               
+%     rootPath = '/data/VALCERT/derivatives/fmriprep';
+%     
+%     % This can be changed to accomodate the control motor files:
+%     % the format of the sub/ses/run should be the same for both types of
+%     % json file and simply include an asterisk instead of a number
+%     %filePattern = 'sub-*_ses-*_task-attlearn_run-*_desc-glm-onsets.json';
+%     filePattern = 'sub-*_ses-*_task-MOTOR_run-*_desc-glm-onsets.json';
+%     
+%     % Declare folder to save files
+%     %saveFolder = '/data/VALCERT/derivatives/fl_glm/task';
+%     saveFolder = '/data/VALCERT/derivatives/fl_glm/hand';
+% 
+%     % inspect json data for run 1 vs run 2
+%     % NOT cells for duration and onsets
+%     run1 = jsondecode(fileread('/data/VALCERT/derivatives/fmriprep/sub-01/ses-02/beh/sub-01_ses-02_task-MOTOR_run-1_desc-glm-onsets.json'));
+%     
+%     class(run1.names)
+%     class(run1.durations)
+%     class(run1.onsets)
+% 
+%     isa(run1.names, 'cell')
+%     isa(run1.durations, 'cell')
+%     isa(run1.onsets, 'cell')
+% 
+%     testtrans = transpose(run1.durations);
+%     testcell = {testtrans(:,1),testtrans(:,2)};
+% 
+%     % cells for durations and onsets
+%     run2 = jsondecode(fileread('/data/VALCERT/derivatives/fmriprep/sub-01/ses-02/beh/sub-01_ses-02_task-MOTOR_run-2_desc-glm-onsets.json'));
+%     class(run2.names)
+%     class(run2.durations)
+%     class(run2.onsets)
+
+
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     % define sub folder names: this are fairly hard coded due to the
     % standardised structures in the workflow 
     subFolderPattern = 'sub-*';
@@ -26,15 +67,19 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
     
     % Iterate over each subfolder
     for FolderIdx = 1:numel(subFolders)
+        
         % append the sub number to build sub-n folder path
         subFolderPath = fullfile(rootPath, subFolders(FolderIdx).name);
         
+%         if subFolders(FolderIdx).name == 'sub-92'
+%             disp("it prints") 
+%         end 
+
         % Check if the sesFolderPattern exists in the subfolder
         sesFolders = dir(fullfile(subFolderPath, sesFolderPattern));
 
         sesFolders
 
-        
         % Report if session folder is missing and continue to the 
         % next session - only check for directory
          if isempty(sesFolders) %|| ~all([sesFolders.isdir])
@@ -103,9 +148,9 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
                                         
                     continue;
 
-                end
+                end % ismpty if statement
                  
-             end
+             end % else
             
 
 
@@ -116,11 +161,76 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
 
                 % Load the JSON data from the file
                 json_data = jsondecode(fileread(filePath));
+               
 
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %
                 % Store the data in the struct
-                mat_data.names = transpose(json_data.names);
-                mat_data.onsets = transpose(json_data.onsets);
-                mat_data.durations = transpose(json_data.durations);
+                % check that all are cells and if not turn into cells
+
+                % check names is a cell
+                if isa(json_data.names, 'cell')
+
+                    
+                    mat_data.names = transpose(json_data.names);
+
+                else % if it isn't, turn it into a cell array
+                    
+                    %test = transpose(run1.durations);
+                    mat_data.names = transpose(json_data.names);
+                    
+                    % n = number of columns
+                    %n = size(test,2);
+                    n = size(mat_data.names,2);
+                    
+                    % convert to cell array
+                    mat_data.names = mat2cell(mat_data.names, size(mat_data.names, 1), ones(1, n));
+                
+                end % of names check
+
+                % check if durations is a cell
+                if isa(json_data.durations, 'cell')
+
+                    
+                    mat_data.durations = transpose(json_data.durations);
+
+                else % if it isn't, turn it into a cell array
+                    
+                    %test = transpose(run1.durations);
+                    mat_data.durations = transpose(json_data.durations);
+                    
+                    % n = number of columns
+                    %n = size(test,2);
+                    n = size(mat_data.durations,2);
+                    
+                    % convert to cell array
+                    mat_data.durations = mat2cell(mat_data.durations, size(mat_data.durations, 1), ones(1, n));
+                
+                end % of durations check
+
+                % check if onsets is a cell
+                if isa(json_data.onsets, 'cell')
+
+                    
+                    mat_data.onsets = transpose(json_data.onsets);
+
+                else % if it isn't, turn it into a cell array
+                    
+                    %test = transpose(run1.durations);
+                    mat_data.onsets = transpose(json_data.onsets);
+                    
+                    % n = number of columns
+                    %n = size(test,2);
+                    n = size(mat_data.onsets,2);
+                    
+                    % convert to cell array
+                    mat_data.onsets = mat2cell(mat_data.onsets, size(mat_data.onsets, 1), ones(1, n));
+                
+                end % of onsets  check
+
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % Make file patterns compatible for code below:
                 % Delete characters after the last *
@@ -226,4 +336,5 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
             end
         end
     end
-end
+
+end % of function
