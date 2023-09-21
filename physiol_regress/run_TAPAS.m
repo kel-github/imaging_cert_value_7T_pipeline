@@ -11,14 +11,18 @@
 
 % ope
 
+% run_spm12.sh /opt/mcr/v99/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/run_TAPAS.m
+
 clear all
 
 figure_control_switch = 0;
-%figure_control_switch = 1;
+%figure_control_switch = 1; % must press key while in terminal to progress
 
 % define subject strings here
-sub_list = {'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+%sub_list = {'01','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','139','152','151'};%{'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+sub_list = {'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','139','152','151'};%{'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
 % to see subs that don't run go to: https://docs.google.com/spreadsheets/d/1Qn6wB7nNfiiPS34IYNtGHWTbe3mS12T34Ka6vbPqmUI/edit#gid=632063575
+% fails for {'02', '137', '140'}
 
 for i = 1:numel(sub_list)
     
@@ -29,6 +33,9 @@ for i = 1:numel(sub_list)
 
     % %% load participant info
     sub = sub_list{i};
+    
+    fprintf("Current subject: %s", sub)
+    
     dat_path = '/data/VALCERT/derivatives/fmriprep/';
     task = 'attlearn';
     load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
