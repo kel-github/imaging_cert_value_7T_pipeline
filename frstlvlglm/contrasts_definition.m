@@ -3,9 +3,9 @@ addpath('/home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlv
 % Set data root folder
 rootFolder = '/data/VALCERT/derivatives/fl_glm';
 
-subject_folder = '002';
+subject_folder = '001';
 
-test_folder = 'hand';
+test_folder = 'task';
 
 filename = 'SPM.mat';
 

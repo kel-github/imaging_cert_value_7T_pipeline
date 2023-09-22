@@ -25,6 +25,7 @@ function contrast_zeros_table = contrast_zero_count(rootPath, SPMfn, sub_fol, te
     %subs = {'01'};
     subfol00 = {sub_fol};%{'001'}; % sub
     sub_fol = 'sub-%s'; % sub folder
+    
     runs = [1, 2, 3];
     nrun = length(runs);
     sess = 2; % 2, or 3

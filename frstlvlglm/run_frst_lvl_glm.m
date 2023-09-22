@@ -7,9 +7,6 @@
 
 % run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/run_frst_lvl_glm.m
 
-%addpath '/home/jovyan/PaulsStuff/spm12'
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -35,56 +32,63 @@
 % 140	    3	69.1119691119691
 
 
-%% define variables that are looped over, or stay the
-% identifying
+%% define subject and session info
 
-% subs = {'02','137','140'} % don't have physio timeseries files
-
-% exclude the following subs entirely as we need all 3 runs for this step:
-% 22, 84, 92, 137, 139, 140
-
-% run sub 2 using motor file
-
-subs = {'01','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'001','004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+% excluding the following subs entirely due to motion etc:
+% 22, 92, 137, 139, 140
 
 
-mot_phy_switch = 1; % default 1 means it will look for the merged file
-% mot_phy_switch = 0; % 0 means it will look for the motion only file
-% subs = {'02'}
-% subfol00 = {'002'}
+% these subjects have 3 runs + PhysSIO
+subs = {'04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+subfol00 = {'004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+% test run
+% subs = {'01'};
+% subfol00 = {'001'};
+
+nrun = 3;
+runs = [1, 2, 3];
+
+% awkward subject with only 2 runs, run separately
+% subs = {'84'};
+% subfol00 = {'084'};
+% nrun = 2;
+% runs = [1, 3];
+
 
 % sanity_switch = 0; % run task code
-sanity_switch = 1; % run motor/hand sanity check code
 
-runs = [1, 2, 3];
-nrun = length(runs);
+sanity_switch = 0; % run motor/hand sanity check code
+
+% session + nscan stuff
 sess = 2; % 2, or 3
 nscans = 518;
 
 % where stuff is:
-
 % will save SPM.mat file here:
-spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%ses-02_SPM'; % top level for spm mat files % 
+%spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%ses-02_SPM'; % top level for spm mat files % 
+spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';%ses-02_SPM'; % top level for spm mat files % 
 
 % SPM onsets are at this location
-task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
-%task_info_mat_file_dir = 'data/derivatives/fl_glm/task;'
+%task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
+task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
 
 % this is where the multiple nuisance regressors (motion, heart rate) are
 % stored
 fmri_data_dir = '/data/VALCERT/derivatives/fmriprep';%'C:\Users\pboyce\OneDrive - UNSW/func/data/VALCERT/derivatives/fl_glm/smooth_data';%/preproc_task_fmri/'; % where the fmri data is
+
 % this is where the smoothed data is stored
 smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
+% filter for scans - this is smoothed files pattern
+file_filt = 'ssub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
+
+% BIDS-esque info - i.e. subject and session folder names
 sub_fol = 'sub-%s'; % sub folder
 ses_fol = 'ses-02'; % session folder
 frst_lvl_fol = 'func';%'frstlvl'; % nxt sub folder
 
-
 spm_fol = 'SPM'; % this GLM
 
-% filter for scans - this is smoothed files pattern
-file_filt = 'ssub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
+
 %'^swraf.*\.nii$'
 %irun
 
@@ -109,11 +113,22 @@ for subj = 1:length(subs)
 
     % note the next line of code assumes that the folders up to and
     % including 'fl_glm' exist already
-%     if not(isfolder(spm_fol_full)) % check if the folder exists
-%         mkdir(spm_fol_full); % if it doesn't exist then make it already
-%     end
+    if not(isfolder(spm_fol_full)) % check if the folder exists
+        mkdir(spm_fol_full); % if it doesn't exist then make it already
+    end
 
-%end
+% set the template for the motion + nuisance regressors file
+% first step, does the merged motion + PhysIO outputs file exist?
+phys_exist_check = exist(fullfile(fmri_data_dir, ...
+                                sprintf(sub_fol, this_sub), ...
+                                'ses-02', 'func',...
+                                 sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
+                                 this_sub)), 'file');
+if phys_exist_check
+    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
+else
+    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFINE MATLAB JOBS
@@ -127,15 +142,17 @@ matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.51;
 matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t = 16;
 matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
 
-
 % now loop through runs
 % 
 for irun = 1:nrun
 
     this_data_fol = fullfile(smoothed_data_dir, sprintf(sub_fol, subfol00{subj}), ses_fol, ...
                              'func');
-    this_file_filt = sprintf(file_filt, this_sub, irun); % populate the filter for this run
+    this_file_filt = sprintf(file_filt, this_sub, runs(irun)); % populate the filter for this run
 
+    %%%%%%%
+    %%% get mask if needed
+    %%%%%%%
     fullmaskname = fullfile(smoothed_data_dir, sprintf(sub_fol, subfol00{subj}), ...
         'ses-02', 'func',...
         sprintf('sub-%s_ses-02_task-attlearn_run-1_space-MNI152NLin2009cAsym_desc-brain_mask.nii', ...
@@ -163,46 +180,17 @@ for irun = 1:nrun
     % /data/VALCERT/derivatives/fl_glm/hand/sub-001/ses-02/func
     % this is the file pattern that contains the onsets, durations, names: sub-151_ses-02_run-1_desc-SPM-onsets.mat
     matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi = cellstr(fullfile(task_info_mat_file_dir, sprintf('sub-%s/ses-02', subfol00{subj}),...
-                                                                  'func', sprintf('sub-%s_ses-02_run-%d_desc-SPM-onsets.mat', this_sub, irun))); % Select the task info (ie. names/onsets/durations) for this run 
+                                                                  'func', sprintf('sub-%s_ses-02_run-%d_desc-SPM-onsets.mat', this_sub, runs(irun)))); % Select the task info (ie. names/onsets/durations) for this run 
    
 
     % create structure for regression: may not need to change this for
     % motion phys regressmatlabbatch
     matlabbatch{1}.spm.stats.fmri_spec.sess(irun).regress = struct('name', {}, 'val', {}); % task-attlearn
-
-    % change this to call in motion and phys regressors
-    % sub-01_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt
-    % /data/VALCERT/derivatives/fmriprep/sub-01/ses-02/func
-    % NOTE THAT THE REGRESSORS HAVE TO BE IN THE FOLDER WHERE THE SPM IS
-    % SAVED
-    %matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
-    %                                                               this_sub, irun);
-
-    
-    % if merged file available
-    if mot_phy_switch == 1
-
-        matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
-                                                                             sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
-                                                                             this_sub, irun)));
-
-    end % of merged switch
-
-    % if only motion file available
-    if mot_phy_switch == 0
-
-        matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
-                                                                             sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt',...
-                                                                             this_sub, irun)));
-                                                                                      % sub-02_ses-02_task-attlearn_run-3_desc-motion_timeseries
-
-    end % of movement switch
-
-
+    matlabbatch{1}.spm.stats.fmri_spec.sess(irun).multi_reg  =  cellstr(fullfile(fmri_data_dir, sprintf(sub_fol, this_sub), 'ses-02', 'func',...
+                                                                             sprintf(motion_tmplt,...
+                                                                             this_sub, runs(irun))));
     % high pass filter - default value
     matlabbatch{1}.spm.stats.fmri_spec.sess(irun).hpf = 128;
-
-
 
 end
 
@@ -219,17 +207,8 @@ matlabbatch{1}.spm.stats.fmri_spec.cvi = 'FAST'; % correct for serial correlatio
 
 if sanity_switch == 0 % run task code
 % 
-%     % will specify own contrasts
-
-% matlabbatch{1}.spm.stats.fmri_spec.fact(1).name = 'target_location';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(1).levels = 2;
-% matlabbatch{1}.spm.stats.fmri_spec.fact(2).name = 'spatial_cue';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(2).levels = 2;
-% matlabbatch{1}.spm.stats.fmri_spec.fact(3).name = 'value_cue';
-% matlabbatch{1}.spm.stats.fmri_spec.fact(3).levels = 4;
-    
-    disp("task name and factors placeholder...")
-
+%     % will specify own contrasts,
+%       no need for code here
 % 
 end
 

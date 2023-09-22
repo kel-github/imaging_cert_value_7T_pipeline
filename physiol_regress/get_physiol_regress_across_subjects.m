@@ -12,6 +12,7 @@ clear all
 
 sub_file = '/data/VALCERT/derivatives/complete-participants.csv';
 sub_list = readmatrix(sub_file);
+sub_list = 2;
 
 % for reference
 % cardiac = 'sub-%s_ses-0%d_cmrr_att_learn_run-0*_PULS.log';

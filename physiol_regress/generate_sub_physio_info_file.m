@@ -91,9 +91,7 @@ function [flg] = generate_sub_physio_info_file(subject_number, session_number, d
     cardiac = 'sub-%s_ses-0%d_cmrr_att_learn_run-0*_PULS.log';
     respiration = 'sub-%s_ses-0%d_cmrr_att_learn_run-0*_RESP.log';
     scan_info = 'sub-%s_ses-0%d_cmrr_att_learn_run-0*_Info.log';
-    movement_info = 'sub-%s_ses-0%d_task-attlearn_run-*_desc-motion_timeseries.txt';
-    
-   
+    movement_info = 'sub-%s_ses-0%d_task-attlearn_run-*_desc-motion_timeseries.txt';    
 
     %% dependencies
     addpath('../JSONio-main')

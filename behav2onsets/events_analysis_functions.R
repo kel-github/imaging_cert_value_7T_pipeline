@@ -145,7 +145,7 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   #print(paste0("CONTENTS run: ", run))
   
   # remove error trials
-  #sess_data <- sess_data %>% filter(resp == 1)
+  sess_data <- sess_data %>% filter(resp == 1)
   
   tgt_locs <- c("left", "right")
   spatial_cue_types <- c(".5", ".8") 
