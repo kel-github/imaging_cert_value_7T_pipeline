@@ -49,7 +49,7 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
 
     % define sub folder names: this are fairly hard coded due to the
     % standardised structures in the workflow 
-    subFolderPattern = 'sub-*';
+    subFolderPattern = 'sub-76';
     % not hard coded a session number in case multiple sessions etc.
     sesFolderPattern = 'ses-*';
     behFolderPattern = 'beh';
@@ -70,7 +70,9 @@ function Auto_SPM_mat_generation(rootPath, filePattern, saveFolder)
         
         % append the sub number to build sub-n folder path
         subFolderPath = fullfile(rootPath, subFolders(FolderIdx).name);
-        
+%        subFolderPath = fullfile(subFolders(1).folder, subFolders(5).name); % manual fix for sub 76
+% as sub 76 had hidden folders
+
 %         if subFolders(FolderIdx).name == 'sub-92'
 %             disp("it prints") 
 %         end 
