@@ -24,7 +24,7 @@
 % enter below at command line
 % run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/run_task_contrasts_over_subs.m
 
-subfol = {'001', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+subfol = {'076'};%{'004','006','008','017','020','024','025','075','076','078','079','080','084','124','126','128','129','130','132','133','134','135','137','152','151'};%{'001','002'}
 % define where path for the glms
 flglm_dir = '/data/VALCERT/derivatives/fl_glm/task/sub-%s/SPM/SPM.mat';
 
