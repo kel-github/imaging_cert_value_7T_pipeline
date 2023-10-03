@@ -39,20 +39,25 @@
 
 
 % these subjects have 3 runs + PhysSIO
-subs = {'04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
-% test run
-% subs = {'01'};
-% subfol00 = {'001'};
-
-nrun = 3;
-runs = [1, 2, 3];
+% subs = {'04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+% subfol00 = {'004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+% % test run
+% % subs = {'01'};
+% % subfol00 = {'001'};
+% 
+% nrun = 3;
+% runs = [1, 2, 3];
 
 % awkward subject with only 2 runs, run separately
-% subs = {'84'};
-% subfol00 = {'084'};
+subs = {'84'};
+subfol00 = {'084'};
+nrun = 2;
+runs = [1, 3];
+
+% subs = {'137'};
+% subfol00 = {'137'};
 % nrun = 2;
-% runs = [1, 3];
+% runs = [1, 2];
 
 
 % sanity_switch = 0; % run task code
@@ -60,7 +65,7 @@ runs = [1, 2, 3];
 sanity_switch = 0; % run motor/hand sanity check code
 
 % session + nscan stuff
-sess = 2; % 2, or 3
+sess = 2; % 2
 nscans = 518;
 
 % where stuff is:
@@ -87,7 +92,6 @@ ses_fol = 'ses-02'; % session folder
 frst_lvl_fol = 'func';%'frstlvl'; % nxt sub folder
 
 spm_fol = 'SPM'; % this GLM
-
 
 %'^swraf.*\.nii$'
 %irun
