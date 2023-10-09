@@ -23,7 +23,6 @@ motor_sanity_on = FALSE
 
 # get list of subject numbers who did fmri task
 sub_nums <- t(read.csv('/data/VALCERT/derivatives/complete-participants.csv', header = FALSE))
-#sub_nums <- sub_nums[1]
 runs <- rep(3, length(sub_nums)) # this needs to be a vector of length sub_nums, with the corresponding number of runs we
 runs[which(sub_nums == 137)] <- 2
 # have for that participant

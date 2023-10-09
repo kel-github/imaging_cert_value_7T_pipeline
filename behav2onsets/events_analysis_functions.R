@@ -144,9 +144,12 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   
   #print(paste0("CONTENTS run: ", run))
   
-  # remove error trials
+  # get error trials and .2 trials, these will make a separate regressor
+  regressors_of_no_int <- sess_data %>% filter(resp == 0 | cert == ".2")
+  # remove error trials 
   sess_data <- sess_data %>% filter(resp == 1)
   
+  # now get the tgt side x spatial cue x value cue regressors
   tgt_locs <- c("left", "right")
   spatial_cue_types <- c(".5", ".8") 
   # making a variable that will tell me which value 
@@ -162,6 +165,8 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   # entries match 'tgt_locs'
   sess_data$loc <- as.factor(sess_data$loc) # where the tgt appeared
   levels(sess_data$loc) <- c("left", "right")
+  regressors_of_no_int$loc <- as.factor(regressors_of_no_int$loc)
+  levels(regressors_of_no_int$loc) <- c("left", "right")
   # need to add a column here if motor argument == TRUE
   # thing is, names would be just replaced with the response hand
 
@@ -171,7 +176,21 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   
     names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
     names = sort(as.vector(outer(names, value_cue_types, paste, sep = "_")))
-  }
+    
+    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$val_config == z],
+                     x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
+                     y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
+                     z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
+                     SIMPLIFY = FALSE)
+
+    # now add the regressors that we need to have out of the baseline, but that are not of theoretical interest
+    names <- c(names, "xtra_left_tgt", "xtra_right_tgt")
+    xtra <- lapply(tgt_locs, function(x) regressors_of_no_int$rel.onset[regressors_of_no_int$loc == x])
+    onsets <- append(onsets, xtra)
+    
+    durations <- lapply(onsets, function(x) rep(0, length(x)))
+    
+  } # end of if motor_sanity == FALSE statement
   
   if (motor_sanity == TRUE){
 
@@ -222,18 +241,6 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
     durations <- lapply(onsets, function(x) rep(0, length(x)))
     
   } # end of if motor_sanity == TRUE statement
-  
-  # values assigned to SPM json files if extracting experimental data
-  if (motor_sanity == FALSE){
-    
-    onsets <- mapply(function(x, y, z) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y & sess_data$val_config == z],
-                                        x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
-                                        y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
-                                        z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
-                     SIMPLIFY = FALSE)
-    durations <- lapply(onsets, function(x) rep(0, length(x)))
-  
-  } # end of if motor_sanity == FALSE statement
   
     out <- list(names, onsets, durations)
     names(out) <- c("names", "onsets", "durations")
