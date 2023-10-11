@@ -11,15 +11,15 @@
 %%%%%%% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/scndlvlglm/N27_mu_fx.m
 %% first define specification things
 save_location = '/data/VALCERT/derivatives/sl_glm/N27_mufx'; % here is where you'll save the second level SPM file, is a string
-subs = {'001','002','004','006','008','017','020','024','025','075','076','078','079','080','084','124','126','128','129','130',...
-        '132','133','134','135','137','152','151'}; % sub list checked by KG Oct 4th 2023 - DO NOT COMMENT OR CHANGE THIS VARIABLE
+subs = {'001','002','004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130',...
+        '132','133','134','135','152','151'}; %'084','137'% sub list checked by KG Oct 4th 2023 - DO NOT COMMENT OR CHANGE THIS VARIABLE
 % WITHOUT EXPLAINING WHY HERE%-----------------------------------------------------------------------
-
+% currently amended for sanity checking Oct 9th 2023
 clear matlabbatch
 matlabbatch{1}.spm.stats.factorial_design.dir = {save_location};
 ims = {};
 for isub = 1:length(subs)
- ims{isub,1} = sprintf('/data/VALCERT/derivatives/fl_glm/task/sub-%s/SPM/con_0002.nii,1',subs{isub});
+ ims{isub,1} = sprintf('/data/VALCERT/derivatives/fl_glm/task/sub-%s/SPM/con_0004.nii,1',subs{isub});
 end
 matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = ims;
 

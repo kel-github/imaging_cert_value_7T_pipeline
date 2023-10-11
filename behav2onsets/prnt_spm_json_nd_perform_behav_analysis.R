@@ -19,6 +19,9 @@ source('events_analysis_functions.R')
 # create experiment SPM files
 motor_sanity_on = FALSE
 
+# do a simplified 2 (cue cert) x 2 (tgt loc) model
+simplified_spatial = TRUE
+
 ################################################################################
 
 # get list of subject numbers who did fmri task
@@ -50,7 +53,7 @@ count = 0
 
 # Define function to print onsets
 # --------------------------------------------------------------------
-get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
+get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, motor_sanity_on, simplified_spatial, verbose){
   # for a single subject, get mri behaviour details and save the outputs to
   # a json glm file for use with spm (one json file per run)
   # return a dataframe containing the behavioural data concatenated across
@@ -60,6 +63,9 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
   # -- runN [int]: how many runs do we have for that subject?
   # -- data_dir [str]: where do you want outputs to be saved? e.g. '~/Insync/tmp-data/full-exp-pilot-raw'
   #                      functions assume that this is the top level for where sub-x/ses-x/beh lives
+  # -- motor_sanity_on [T/F]: do you want the full task or the hand/motor sanity check
+  # -- simplfied_spatial [T/F]: do you want the 2 (cert) x 2 (tgt side) model (overrides motor_sanity_on
+  #                    if set to T)
   # -- verbose [TRUE or FALSE]: return plot of subject data?
   # Returns:
   # -- json file for each run containing names, onsets and durations for defining glm in spm
@@ -124,12 +130,13 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
   #print(paste0("The 1 below represents Run 1 of the file of interest; this is only applicable to the motor file generation"))
   # run line below to generate motor sanity check SPM files
   namePatt<-"_task-learnAtt_acq-TR1510_bold_"
-  events_4_spm <- mapply(match_behaviour_to_event_timings, all_behav_info, event_timings, motor_sanity=motor_sanity_on, sub, session, 1, data_dir, namePatt, SIMPLIFY = FALSE)
+  events_4_spm <- mapply(match_behaviour_to_event_timings, all_behav_info, event_timings, motor_sanity=motor_sanity_on, simplified_spatial, sub, session, 1, data_dir, namePatt, SIMPLIFY = FALSE)
   
   #print(paste0("CONTENT events_4_spm: ", events_4_spm))
   
   # now write to json files
-  lapply(1:length(events_4_spm), function(x) write_json_4_spm(events_4_spm[[x]], fpath=data_dir, sub, x, motor_sanity = motor_sanity_on))
+  lapply(1:length(events_4_spm), function(x) write_json_4_spm(events_4_spm[[x]], fpath=data_dir, sub, x, motor_sanity = motor_sanity_on,
+                                                              simplified_spatial = simplified_spatial))
   
   # now rbind behavioural data and plot
   dat_4_behav_analysis <- do.call(rbind, all_behav_info)
@@ -151,7 +158,8 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, verbose){
 
 # Run function
 # --------------------------------------------------------------------
-dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, verbose = FALSE))
+dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, motor_sanity_on = FALSE,
+                                                                                               simplified_spatial = TRUE, verbose = FALSE))
 
 # there should 3 trials missing in one file??
 # subject number

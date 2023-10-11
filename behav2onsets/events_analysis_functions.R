@@ -121,7 +121,7 @@ allocate_conditions_on_d <- function(d){
 # not lopping -> just running from scratch each time
 # adapt json code to just capture one file...
 
-match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub=NA, sess=NA, run=NA, sub_folders=NA, namePatt=NA){
+match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, simplified_spatial = FALSE, sub=NA, sess=NA, run=NA, sub_folders=NA, namePatt=NA){
   # using the behaviour info that has been through 'allocate_conditions_on_d'
   # and the event timings info in evs, find the times and onsets for
   # each condition of interest.
@@ -133,6 +133,8 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   #                    and 'allocate_conditions_on_d'
   # -- evs [dataframe] event timings from the run matching dat, acquired using 'get_event_times_data'
   # -- motor_sanity [TRUE/FALSE] when TRUE, pulls data for motor response left hand vs right hand; when FALSE pulls data for task
+  # -- simplified_spatial [TRUE/FALSE]: when TRUE, pulls onsets for the 2 (cue cert .5, .8) x 2 (tgt loc: left vs right) factorial
+  #     note that if TRUE, it supercedes motor sanity vs task
   # -- sub [dataframe] subject numbers pulled from csv file
   # -- sess [integer] session number of interest
   # -- run [integer] hardcoded as '1' given response mapping is the same for a given participant across n runs
@@ -191,7 +193,7 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
     durations <- lapply(onsets, function(x) rep(0, length(x)))
     
   } # end of if motor_sanity == FALSE statement
-  
+
   if (motor_sanity == TRUE){
 
     # call resp_map_counter to capture resp mapping
@@ -227,7 +229,6 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
   
   #print(paste0("THIS IS WHAT names length LOOKS LIKE: ", length(names)))
 
-
   # values assigned to SPM json files if extracting motor response info
   if (motor_sanity == TRUE){
     
@@ -242,6 +243,23 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sub
     
   } # end of if motor_sanity == TRUE statement
   
+  
+  if (simplified_spatial == TRUE){
+    
+    rm(names, onsets, durations, xtra)
+    
+    names = sort(as.vector(outer(tgt_locs, spatial_cue_types, paste, sep="_")))
+    
+    onsets <- mapply(function(x, y) sess_data$rel.onset[sess_data$loc == x & sess_data$cert == y],
+                     x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
+                     y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
+                     SIMPLIFY = FALSE)
+    
+    xtra <- lapply(tgt_locs, function(x) regressors_of_no_int$rel.onset[regressors_of_no_int$loc == x])
+    names <- c(names, "xtra_left_tgt", "xtra_right_tgt")
+    onsets <- append(onsets, xtra)
+    durations <- lapply(onsets, function(x) rep(0, length(x)))
+  }
     out <- list(names, onsets, durations)
     names(out) <- c("names", "onsets", "durations")
     out
@@ -382,7 +400,7 @@ resp_map_LvsR <- function(sub, sess, run, data_dir, namePatt){
 }
 
 
-write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity = FALSE){
+write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity = FALSE, simplified_spatial = FALSE){
   # given the events list for spm, produced using 'events_4_spm'
   # write a json file for each run in the BIDS directory defined by fpath
   # Args:
@@ -390,6 +408,10 @@ write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity
   #                          using mapply(match_behaviour_to_event_timings)
   # -- fpath [str]: the location of the BIDS directory of choice
   # -- sub_num [int]: subject number
+  # -- run_num [int]: run number
+  # -- motor_sanity: T/F - do you want the onsets for the task or the motor sanity
+  # -- simplified_spatial: T/F - are you printing onsets for the simplified 2 x 2 (cert x tgt loc)
+  #     note that if this is true, it overrides the motor_sanity options
   # Outputs: 
   # -- a json file of names, onsets and durations for each run, printed to the 
   #                          BIDS directory of choice
@@ -412,6 +434,12 @@ write_json_4_spm <- function(events_4_spm, fpath, sub_num, run_num, motor_sanity
   if (motor_sanity==TRUE){
     
     filenameMain <- '_ses-02_task-MOTOR_run-%d_desc-glm-onsets.json'
+    
+  }
+  
+  if (simplified_spatial){
+    
+    filenameMain <- '_ses-02_task-cuecert_run-%d_desc-glm-onsets.json'
     
   }
   

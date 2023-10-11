@@ -71,11 +71,11 @@ nscans = 518;
 % where stuff is:
 % will save SPM.mat file here:
 %spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%ses-02_SPM'; % top level for spm mat files % 
-spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';%ses-02_SPM'; % top level for spm mat files % 
-
+%spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';%ses-02_SPM'; % top level for spm mat files % 
+spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/spat_cert';
 % SPM onsets are at this location
 %task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
-task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
+task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/spat_cert';
 
 % this is where the multiple nuisance regressors (motion, heart rate) are
 % stored
