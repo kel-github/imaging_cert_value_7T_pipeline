@@ -18,12 +18,12 @@ FD_results <- data.frame(part_num = character(0), run = character(0), perc = num
 
 # set how many times to check for missing file:
 # in this version, the first iteration is the default pattern, the subsequent
-# 2 interations add one leading zero, and two leadings zeros respectively to 
+# 2 iterations add one leading zero, and two leading zeros respectively to 
 # the run- parameter in the file name
 max_iterations = 3 # original + one and two leading zeros
 
 # set the FD censoring threshold in mm
-censor_threshold = 0.2
+censor_threshold = 0.5#0.2
 # return runs that are >= n% FD threshold breaking
 perc_threshold = 60
 
@@ -137,14 +137,14 @@ for(curr_sub in 1:length(sub_nums$part_nums)){
 FD_results
 
 # choose where to write output for each participant's run
-write.csv(FD_results,"/home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/FD_results_point2_thresh.csv", row.names=FALSE)
+#write.csv(FD_results,"/home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/FD_results_point2_thresh.csv", row.names=FALSE)
 
 # pass all participant rows that meet or exceed percentage FD threshold specified into dataframe
 perc60 <-FD_results[FD_results$perc>=perc_threshold,]
 perc60
 
 # choose where to write dataframe containing each run meeting or exceeding percentage
-write.csv(perc60,"/home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/FD_results_point2_60_perc.csv", row.names=FALSE)
+#write.csv(perc60,"/home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/FD_results_point2_60_perc.csv", row.names=FALSE)
 
 # return max percentage and associated row information
 FD_results[which.max(FD_results$perc),]

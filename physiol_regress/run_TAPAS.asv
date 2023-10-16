@@ -11,7 +11,7 @@
 
 % ope
 
-% run in physio bash
+% run 
 % run_spm12.sh /opt/mcr/v99/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/run_TAPAS.m
 
 clear all
@@ -20,12 +20,10 @@ figure_control_switch = 0;
 %figure_control_switch = 1; % must press key while in terminal to progress
 
 % define subject strings here
-% full list
-sub_list = {'01','02','04','06','08','17','20','22','24','25','75','76','78','79','80','84','92','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
-% {'02','84','92'}%
-
+%sub_list = {'01','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','139','152','151'};%{'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+sub_list = {'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
 % to see subs that don't run go to: https://docs.google.com/spreadsheets/d/1Qn6wB7nNfiiPS34IYNtGHWTbe3mS12T34Ka6vbPqmUI/edit#gid=632063575
-% fails to load phusioinfo for {'02','84','92'} [...]desc-physioinfo.mat not existing
+% fails for {'02', '137', '140'}
 
 for i = 1:numel(sub_list)
     
@@ -41,44 +39,8 @@ for i = 1:numel(sub_list)
     
     dat_path = '/data/VALCERT/derivatives/fmriprep/';
     task = 'attlearn';
-
-
-    % check if file exists
-    physioinfo_exist_check = exist(fullfile(dat_path, ...
-                                 sprintf('sub-%s', sub), ...
-                                'ses-02', 'func',...
-                                 sprintf('sub-%s_ses-02_task-%s_desc-physioinfo.json', sub, task)), 'file');
-
-    fprintf("CONTENTS of physioinfo_exist_check %d", physioinfo_exist_check)
- 
-    % load file if it exists
-    if physioinfo_exist_check
-
-        load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))      
-
-    else % otherwise continue to next iteration
-
-        fprintf('Could not load physioinfo file for pariticpant %s, file may not exist', sub);
-        
-        continue
-
-    end
-
-        
-%         load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
-%             sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
-%         fprintf("GETS HERE FOR subject: %s", sub)
-%     
-%     catch ME
-%     
-%         fprintf('Could not load %s for pariticpant %s, run %d, physiological file/s may not exist', fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
-%             sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)), sub, irun);
-%         
-%         continue
-% 
-%     end
-
-    
+    load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
+        sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
 
     % set variables
     nrun = info.nrun;

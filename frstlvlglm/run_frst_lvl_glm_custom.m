@@ -84,9 +84,8 @@ task_info_mat_file_dir = '/data/valcert-sanity/smooth_data';
 fmri_data_dir = '/data/VALCERT/derivatives/fmriprep';%'C:\Users\pboyce\OneDrive - UNSW/func/data/VALCERT/derivatives/fl_glm/smooth_data';%/preproc_task_fmri/'; % where the fmri data is
 
 % this is where the smoothed data is stored
-smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
+smoothed_data_dir = '/data/valcert-sanity/smooth_data';
 % filter for scans - this is smoothed files pattern
-% fwhm_6.0_sub-01_ses-02_task-attlearn_run-3_space-MNI152NLin2009cAsym_desc-preproc_bold
 file_filt = 'fwhm_6.0_sub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
 
 % BIDS-esque info - i.e. subject and session folder names
@@ -131,12 +130,27 @@ phys_exist_check = exist(fullfile(fmri_data_dir, ...
                                 'ses-02', 'func',...
                                  sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
                                  this_sub)), 'file');
+
+% change this code to account for desire to have both for each participant
+% and also account for some participants not having physio
+
+% create a struct to hold file regressor file patterns
+regressor_files = struct('type', {'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt'; ...
+    'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt'});
+
+% can be achuieved by hard coding size of copy struct value
 if phys_exist_check
     motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
+    % if this exists where should run a loop for both struct items
 else
-    %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
-    fprintf("Physio file missing for subject %s", this_sub)
+    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
+    % if only motion exists we should only run motion struct item
 end
+
+% put loop here that depends on struct size and values... 
+% be sure to assign files to differing locations - add a prefix based on
+% size of struct which we can combine to end of folder name where SPM is
+% saved
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFINE MATLAB JOBS

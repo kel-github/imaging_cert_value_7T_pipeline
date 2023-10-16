@@ -5,7 +5,7 @@
 %-----------------------------------------------------------------------
 % Defining spm batch for defining 1st level GLM
 
-% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/run_frst_lvl_glm.m
+% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/frstlvlglm/run_frst_lvl_glm_combined.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,12 +34,8 @@
 
 %% define subject and session info
 
-% excluding the following subs entirely due to motion etc:
-% 22, 92, 139, 140
-
-
-subs = {'76'};%{'02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'076'};%{'002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+subs = {'01','02','04','06','08','17','20','22','24','25','75','76','78','79','80','84','92','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+subfol00 = {'001','002','004','006','008','017','020','022','024','025','075','076','078','079','080','084','092','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};;
 % test run
 % subs = {'01'};
 % subfol00 = {'001'};
@@ -76,15 +72,16 @@ spm_mat_file_dir ='/data/valcert-sanity/smooth_data';
 
 % SPM onsets are at this location
 %task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
-% task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
-task_info_mat_file_dir = '/data/valcert-sanity/smooth_data';
+task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
+%task_info_mat_file_dir = '/data/valcert-sanity/smooth_data';
 
 % this is where the multiple nuisance regressors (motion, heart rate) are
 % stored
 fmri_data_dir = '/data/VALCERT/derivatives/fmriprep';%'C:\Users\pboyce\OneDrive - UNSW/func/data/VALCERT/derivatives/fl_glm/smooth_data';%/preproc_task_fmri/'; % where the fmri data is
 
 % this is where the smoothed data is stored
-smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
+%smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
+smoothed_data_dir = '/data/valcert-sanity/smooth_data';
 % filter for scans - this is smoothed files pattern
 % fwhm_6.0_sub-01_ses-02_task-attlearn_run-3_space-MNI152NLin2009cAsym_desc-preproc_bold
 file_filt = 'fwhm_6.0_sub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
@@ -94,7 +91,7 @@ sub_fol = 'sub-%s'; % sub folder
 ses_fol = 'ses-02'; % session folder
 frst_lvl_fol = 'func';%'frstlvl'; % nxt sub folder
 
-spm_fol = 'SPM'; % this GLM
+spm_fol = 'combined_SPM'; % this GLM
 
 %'^swraf.*\.nii$'
 %irun
@@ -124,19 +121,6 @@ for subj = 1:length(subs)
         mkdir(spm_fol_full); % if it doesn't exist then make it already
     end
 
-% set the template for the motion + nuisance regressors file
-% first step, does the merged motion + PhysIO outputs file exist?
-phys_exist_check = exist(fullfile(fmri_data_dir, ...
-                                sprintf(sub_fol, this_sub), ...
-                                'ses-02', 'func',...
-                                 sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
-                                 this_sub)), 'file');
-if phys_exist_check
-    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
-else
-    %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
-    fprintf("Physio file missing for subject %s", this_sub)
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFINE MATLAB JOBS
@@ -153,6 +137,26 @@ matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
 % now loop through runs
 % 
 for irun = 1:nrun
+
+    % set the template for the motion + nuisance regressors file
+    % first step, does the merged motion + PhysIO outputs file exist?
+    phys_exist_check = exist(fullfile(fmri_data_dir, ...
+                                    sprintf(sub_fol, this_sub), ...
+                                    'ses-02', 'func',...
+                                     sprintf('sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt',...
+                                     this_sub,irun)), 'file');
+    if phys_exist_check
+        motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
+    else
+        %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
+        fprintf("\n")
+        fprintf("[...]physregress_timeseries file missing for subject %s for run %d", this_sub, irun)
+        fprintf("\n")
+        fprintf("Skipping onto next run...")
+        fprintf("\n")
+        continue
+    end
+
 
     this_data_fol = fullfile(smoothed_data_dir, sprintf(sub_fol, subfol00{subj}), ses_fol, ...
                              'func');
