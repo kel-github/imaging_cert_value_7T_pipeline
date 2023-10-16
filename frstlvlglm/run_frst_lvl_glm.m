@@ -38,8 +38,8 @@
 % 22, 92, 139, 140
 
 
-subs = {'76'};%{'02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'076'};%{'002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+subs = {'01', '02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+subfol00 = {'001', '002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
 % test run
 % subs = {'01'};
 % subfol00 = {'001'};
@@ -71,13 +71,11 @@ nscans = 518;
 % where stuff is:
 % will save SPM.mat file here:
 %spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%ses-02_SPM'; % top level for spm mat files % 
-%spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';% top level for spm mat files % 
-spm_mat_file_dir ='/data/valcert-sanity/smooth_data';
+spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';% top level for spm mat files % 
 
 % SPM onsets are at this location
 %task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
-% task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
-task_info_mat_file_dir = '/data/valcert-sanity/smooth_data';
+task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
 
 % this is where the multiple nuisance regressors (motion, heart rate) are
 % stored
