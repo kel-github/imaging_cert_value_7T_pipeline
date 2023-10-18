@@ -11,6 +11,7 @@
 
 % ope
 
+% run in physio bash
 % run_spm12.sh /opt/mcr/v99/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/physiol_regress/run_TAPAS.m
 
 clear all
@@ -19,10 +20,12 @@ figure_control_switch = 0;
 %figure_control_switch = 1; % must press key while in terminal to progress
 
 % define subject strings here
-%sub_list = {'01','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','139','152','151'};%{'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
-sub_list = {'137'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','139','152','151'};%{'01'}%{'139','151','152'}%{'01','04','06','08','17','20','22','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+% full list
+sub_list = {'01','02','04','06','08','17','20','22','24','25','75','76','78','79','80','84','92','124','126','128','129','130','132','133','134','135','137','139','140','152','151'};
+% {'02','84','92'}%
+
 % to see subs that don't run go to: https://docs.google.com/spreadsheets/d/1Qn6wB7nNfiiPS34IYNtGHWTbe3mS12T34Ka6vbPqmUI/edit#gid=632063575
-% fails for {'02', '137', '140'}
+% fails to load phusioinfo for {'02','84','92'} [...]desc-physioinfo.mat not existing
 
 for i = 1:numel(sub_list)
     
@@ -38,8 +41,44 @@ for i = 1:numel(sub_list)
     
     dat_path = '/data/VALCERT/derivatives/fmriprep/';
     task = 'attlearn';
-    load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
-        sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
+
+
+    % check if file exists
+    physioinfo_exist_check = exist(fullfile(dat_path, ...
+                                 sprintf('sub-%s', sub), ...
+                                'ses-02', 'func',...
+                                 sprintf('sub-%s_ses-02_task-%s_desc-physioinfo.json', sub, task)), 'file');
+
+    fprintf("CONTENTS of physioinfo_exist_check %d", physioinfo_exist_check)
+ 
+    % load file if it exists
+    if physioinfo_exist_check
+
+        load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))      
+
+    else % otherwise continue to next iteration
+
+        fprintf('Could not load physioinfo file for pariticpant %s, file may not exist', sub);
+        
+        continue
+
+    end
+
+        
+%         load(fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
+%             sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)))
+%         fprintf("GETS HERE FOR subject: %s", sub)
+%     
+%     catch ME
+%     
+%         fprintf('Could not load %s for pariticpant %s, run %d, physiological file/s may not exist', fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', ...
+%             sprintf('sub-%s_ses-02_task-%s_desc-physioinfo', sub, task)), sub, irun);
+%         
+%         continue
+% 
+%     end
+
+    
 
     % set variables
     nrun = info.nrun;
@@ -81,7 +120,7 @@ for i = 1:numel(sub_list)
         matlabbatch{1}.spm.tools.physio.preproc.cardiac.initial_cpulse_select.auto_template.min = 0.4;
         matlabbatch{1}.spm.tools.physio.preproc.cardiac.initial_cpulse_select.auto_template.file = 'initial_cpulse_kRpeakfile.mat';
         matlabbatch{1}.spm.tools.physio.preproc.cardiac.initial_cpulse_select.auto_template.max_heart_rate_bpm = 90;
-       matlabbatch{1}.spm.tools.physio.preproc.cardiac.posthoc_cpulse_select.off = struct([]);
+        matlabbatch{1}.spm.tools.physio.preproc.cardiac.posthoc_cpulse_select.off = struct([]);
         matlabbatch{1}.spm.tools.physio.preproc.respiratory.filter.passband = [0.01 2];
         matlabbatch{1}.spm.tools.physio.preproc.respiratory.despike = true;
         matlabbatch{1}.spm.tools.physio.model.output_multiple_regressors = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motion-physregress_timeseries.txt', sub, task, irun);
@@ -98,18 +137,27 @@ for i = 1:numel(sub_list)
         matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = {fullfile(dat_path, sprintf('sub-%s', sub), 'ses-02', 'func', sprintf('sub-%s_ses-02_task-%s_run-%d_desc-motion_timeseries.txt', sub, task, irun))}; %8
         matlabbatch{1}.spm.tools.physio.model.movement.yes.order = 12; % then run with 12
         matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_method = 'FD';
-        matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.2;
+        matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 0.5;%0.2;
         matlabbatch{1}.spm.tools.physio.model.other.no = struct([]);
         matlabbatch{1}.spm.tools.physio.verbose.level = 1;
         matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = sprintf('sub-%s_ses-02_task-%s_run-%d_desc-physio-fig', sub, task, irun);
         matlabbatch{1}.spm.tools.physio.verbose.use_tabs = false;
+        
+        try
 
-        spm_jobman('run', matlabbatch);
+            spm_jobman('run', matlabbatch);
+
+        catch
+
+            fprintf('Could not execute spm_jobman for pariticpant %s, run %d, physiological file/s may not exist', sub, irun);
+            continue
+
+        end
+
     end
-
     
     % so, this switch pauses exectuable until a key is pressed. This will
-    % allow user to inpsect current figures. Once continued it will loop
+    % allow user to inspect current figures. Once continued it will loop
     % back around and kill all current figures and move onto the next subject.    
     if figure_control_switch == 1
         

@@ -38,8 +38,8 @@
 % 22, 92, 139, 140
 
 
-subs = {'01', '02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'001', '002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+subs = {'76'};%{'02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+subfol00 = {'076'};%{'002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
 % test run
 % subs = {'01'};
 % subfol00 = {'001'};
@@ -71,20 +71,21 @@ nscans = 518;
 % where stuff is:
 % will save SPM.mat file here:
 %spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%ses-02_SPM'; % top level for spm mat files % 
-spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';% top level for spm mat files % 
+%spm_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';% top level for spm mat files % 
+spm_mat_file_dir ='/data/valcert-sanity/smooth_data';
 
 % SPM onsets are at this location
 %task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/hand';%task_info'; % top level for task info files
-task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
+% task_info_mat_file_dir = '/data/VALCERT/derivatives/fl_glm/task';
+task_info_mat_file_dir = '/data/valcert-sanity/smooth_data';
 
 % this is where the multiple nuisance regressors (motion, heart rate) are
 % stored
 fmri_data_dir = '/data/VALCERT/derivatives/fmriprep';%'C:\Users\pboyce\OneDrive - UNSW/func/data/VALCERT/derivatives/fl_glm/smooth_data';%/preproc_task_fmri/'; % where the fmri data is
 
 % this is where the smoothed data is stored
-smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
+smoothed_data_dir = '/data/valcert-sanity/smooth_data';
 % filter for scans - this is smoothed files pattern
-% fwhm_6.0_sub-01_ses-02_task-attlearn_run-3_space-MNI152NLin2009cAsym_desc-preproc_bold
 file_filt = 'fwhm_6.0_sub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
 
 % BIDS-esque info - i.e. subject and session folder names
@@ -129,12 +130,27 @@ phys_exist_check = exist(fullfile(fmri_data_dir, ...
                                 'ses-02', 'func',...
                                  sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
                                  this_sub)), 'file');
+
+% change this code to account for desire to have both for each participant
+% and also account for some participants not having physio
+
+% create a struct to hold file regressor file patterns
+regressor_files = struct('type', {'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt'; ...
+    'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt'});
+
+% can be achuieved by hard coding size of copy struct value
 if phys_exist_check
     motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
+    % if this exists where should run a loop for both struct items
 else
-    %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
-    fprintf("Physio file missing for subject %s", this_sub)
+    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
+    % if only motion exists we should only run motion struct item
 end
+
+% put loop here that depends on struct size and values... 
+% be sure to assign files to differing locations - add a prefix based on
+% size of struct which we can combine to end of folder name where SPM is
+% saved
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFINE MATLAB JOBS
