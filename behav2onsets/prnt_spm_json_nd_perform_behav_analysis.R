@@ -20,7 +20,7 @@ source('events_analysis_functions.R')
 motor_sanity_on = FALSE
 
 # do a simplified 2 (cue cert) x 2 (tgt loc) model
-simplified_spatial = TRUE
+simplified_spatial = FALSE
 
 ################################################################################
 
@@ -159,7 +159,7 @@ get_spm_onsets_and_data_4_analysis <- function(sub, runN, data_dir, motor_sanity
 # Run function
 # --------------------------------------------------------------------
 dat <- mapply(get_spm_onsets_and_data_4_analysis, sub = sub_nums, runN = runs, MoreArgs = list(data_dir = data_dir, motor_sanity_on = FALSE,
-                                                                                               simplified_spatial = TRUE, verbose = FALSE))
+                                                                                               simplified_spatial = FALSE, verbose = FALSE))
 
 # there should 3 trials missing in one file??
 # subject number

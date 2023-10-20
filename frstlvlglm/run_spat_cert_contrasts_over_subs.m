@@ -49,6 +49,10 @@ for isub = 1:length(subfol)
         matlabbatch{1}.spm.stats.con.consess{3}.fcon.weights = [1 0 0 1 0 0 -1 0 0 -1 0 0 0 0 0 0 0 0]; 
         matlabbatch{1}.spm.stats.con.consess{3}.fcon.sessrep = 'replsc';
 
+        matlabbatch{1}.spm.stats.con.consess{4}.tcon.name = 'cert-by-loc';
+        matlabbatch{1}.spm.stats.con.consess{4}.tcon.weights = [-1 0 0 1 0 0 1 0 0 -1 0 0 0 0 0 0 0 0];
+        matlabbatch{1}.spm.stats.con.consess{4}.tcon.sessrep = 'replsc';
+
         matlabbatch{1}.spm.stats.con.delete = 1;
 
         spm_jobman('run',matlabbatch);

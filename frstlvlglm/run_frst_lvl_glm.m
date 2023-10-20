@@ -38,8 +38,10 @@
 % 22, 92, 139, 140
 
 
-subs = {'01', '02', '04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
-subfol00 = {'001', '002', '004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+subs = {'01', '02','04','06','08','17','20','24','25','75','76','78','79','80','124','126','128','129','130','132','133','134','135','152','151'};
+subfol00 = {'001','002','004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130','132','133','134','135','152','151'};
+%'01', '02'}; %,
+%'001','002'}; %,
 % test run
 % subs = {'01'};
 % subfol00 = {'001'};
@@ -85,7 +87,8 @@ fmri_data_dir = '/data/VALCERT/derivatives/fmriprep';%'C:\Users\pboyce\OneDrive 
 smoothed_data_dir = '/data/VALCERT/derivatives/fl_glm/smooth_data';
 % filter for scans - this is smoothed files pattern
 % fwhm_6.0_sub-01_ses-02_task-attlearn_run-3_space-MNI152NLin2009cAsym_desc-preproc_bold
-file_filt = 'fwhm_6.0_sub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
+file_filt = 'ssub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-preproc_bold.nii';%'^ssub.*run-%d.*.nii$'; % how to get files
+motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
 
 % BIDS-esque info - i.e. subject and session folder names
 sub_fol = 'sub-%s'; % sub folder
@@ -124,17 +127,17 @@ for subj = 1:length(subs)
 
 % set the template for the motion + nuisance regressors file
 % first step, does the merged motion + PhysIO outputs file exist?
-phys_exist_check = exist(fullfile(fmri_data_dir, ...
-                                sprintf(sub_fol, this_sub), ...
-                                'ses-02', 'func',...
-                                 sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
-                                 this_sub)), 'file');
-if phys_exist_check
-    motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
-else
-    %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
-    fprintf("Physio file missing for subject %s", this_sub)
-end
+% phys_exist_check = exist(fullfile(fmri_data_dir, ...
+%                                 sprintf(sub_fol, this_sub), ...
+%                                 'ses-02', 'func',...
+%                                  sprintf('sub-%s_ses-02_task-attlearn_run-1_desc-motion-physregress_timeseries.txt',...
+%                                  this_sub)), 'file');
+% if phys_exist_check
+%     motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion-physregress_timeseries.txt';
+% else
+%     %motion_tmplt = 'sub-%s_ses-02_task-attlearn_run-%d_desc-motion_timeseries.txt';
+%     fprintf("Physio file missing for subject %s", this_sub)
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFINE MATLAB JOBS
@@ -159,12 +162,13 @@ for irun = 1:nrun
     %%%%%%%
     %%% get mask if needed
     %%%%%%%
-    fullmaskname = fullfile(smoothed_data_dir, sprintf(sub_fol, subfol00{subj}), ...
-        'ses-02', 'func',...
-        sprintf('sub-%s_ses-02_task-attlearn_run-1_space-MNI152NLin2009cAsym_desc-brain_mask.nii', ...
-        this_sub));
-    % if needed, unzip the subject's brain mask for this run
     if irun == 1
+        fullmaskname = fullfile(smoothed_data_dir, sprintf(sub_fol, subfol00{subj}), ...
+            'ses-02', 'func',...
+            sprintf('sub-%s_ses-02_task-attlearn_run-%d_space-MNI152NLin2009cAsym_desc-brain_mask.nii', ...
+            this_sub, irun));
+        %if needed, unzip the subject's brain mask for this run
+
         if(~exist(fullmaskname, 'file')) % if it doesn't exist yet, then...
             fprintf(sprintf('unzipping brain mask for sub %s run %d', this_sub, irun))
             msk4unzp = fullfile(fmri_data_dir, sprintf(sub_fol, this_sub),...
@@ -226,10 +230,9 @@ if sanity_switch == 1 % run sanity motor/task code
 
 end
 
-
 % now estimate the GLM
 matlabbatch{2}.spm.stats.fmri_est.spmmat = cellstr([spm_fol_full,'/' 'SPM.mat']);
-matlabbatch{2}.spm.stats.fmri_est.write_residuals = 1;
+matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
 matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
 
 spm('defaults', 'FMRI');

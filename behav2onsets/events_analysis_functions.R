@@ -184,13 +184,24 @@ match_behaviour_to_event_timings <- function(dat, evs, motor_sanity = FALSE, sim
                      y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
                      z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
                      SIMPLIFY = FALSE)
+    
+    # for delta functions
+    #    durations <- lapply(onsets, function(x) rep(0, length(x)))
+    
+    # for RT durations
+    # note: 0.734 is how long it takes for the value and spatial cues to be done
+    durations <- mapply(function(x, y, z) sess_data$rt[sess_data$loc == x & sess_data$cert == y & sess_data$val_config == z]+0.734,
+                        x = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[1,], # tgt location (factor 1)
+                        y = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[2,], # cue prob condition (factor 2)
+                        z = sapply(1:length(names), function(x) str_split(names[[x]], "_")[[1]])[3,], # rel val cond (factor 3)
+                        SIMPLIFY = FALSE)
 
     # now add the regressors that we need to have out of the baseline, but that are not of theoretical interest
     names <- c(names, "xtra_left_tgt", "xtra_right_tgt")
     xtra <- lapply(tgt_locs, function(x) regressors_of_no_int$rel.onset[regressors_of_no_int$loc == x])
     onsets <- append(onsets, xtra)
-    
-    durations <- lapply(onsets, function(x) rep(0, length(x)))
+    xtra_dur <- lapply(tgt_locs, function(x) regressors_of_no_int$rt[regressors_of_no_int$loc == x])
+    durations <- append(durations, xtra_dur)
     
   } # end of if motor_sanity == FALSE statement
 

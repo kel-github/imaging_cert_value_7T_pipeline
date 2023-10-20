@@ -8,13 +8,11 @@
 % cfg_basicio BasicIO - Unknown
 %-----------------------------------------------------------------------
 %%%%%%% command to run
-%%%%%%% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/scndlvlglm/N27_me_tgtside.m
+%%%%%%% run_spm12.sh /opt/mcr/v97/ batch /home/jovyan/neurodesktop-storage/imaging_cert_value_7T_pipeline/scndlvlglm/N27_spatcert_certbyloc.m
 %% first define specification things
-save_location = '/data/VALCERT/derivatives/sl_glm/N27_me_tgtside'; % sm6_mot %here is where you'll save the second level SPM file, is a string
-subs = {'001', '002', '004', '006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130',...
-        '132','133','134','135','152','151'}; %'002', '84','137'% sub list checked by KG Oct 4th 2023 - DO NOT COMMENT OR CHANGE THIS VARIABLE
-% no physio - 2, 84, 92, 140
-% no motion - 140
+save_location = '/data/VALCERT/derivatives/sl_glm/spat_cert_sancheck'; % here is where you'll save the second level SPM file, is a string
+subs = {'001','002','004','006','008','017','020','024','025','075','076','078','079','080','124','126','128','129','130',...
+        '132','133','134','135','152','151'}; %'84','137'% sub list checked by KG Oct 4th 2023 - DO NOT COMMENT OR CHANGE THIS VARIABLE
 % WITHOUT EXPLAINING WHY HERE%
 % % explanation = bug testing for now - Oct 9th 2023 KG
 % -----------------------------------------------------------------------
@@ -22,9 +20,8 @@ subs = {'001', '002', '004', '006','008','017','020','024','025','075','076','07
 clear matlabbatch
 matlabbatch{1}.spm.stats.factorial_design.dir = {save_location};
 ims = {};
-% /data/valcert-sanity/smooth_data/sub-001/combined_SPM/
 for isub = 1:length(subs)
- ims{isub,1} = sprintf('/data/VALCERT/derivatives/fl_glm/task/sub-%s/SPM/con_0005.nii,1',subs{isub});
+ ims{isub,1} = sprintf('/data/VALCERT/derivatives/fl_glm/spat_cert/sub-%s/SPM/con_0004.nii,1',subs{isub});
 end
 matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = ims;
 
